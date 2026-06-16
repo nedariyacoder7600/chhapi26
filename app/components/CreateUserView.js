@@ -221,7 +221,7 @@ export default function CreateUserView() {
         {/* Header */}
         <div className="mb-10 text-left">
           <h1 className="text-3xl font-extrabold text-white tracking-tight sm:text-4xl">
-            Create User Account
+            Create User
           </h1>
           <p className="text-zinc-400 mt-2 text-sm md:text-base">
             Provision new user accounts, assign system access privileges, and configure roles.

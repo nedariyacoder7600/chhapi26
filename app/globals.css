@@ -89,4 +89,266 @@ nextjs-portal,
   display: none !important;
 }
 
+/* Custom curved tab for active sidebar items */
+.sidebar-active-tab {
+  background-color: #ffffff !important;
+  color: var(--primary-accent) !important;
+  border-top-left-radius: 9999px !important;
+  border-bottom-left-radius: 9999px !important;
+  border-top-right-radius: 0px !important;
+  border-bottom-right-radius: 0px !important;
+  margin-right: -2px !important;
+  border-right-width: 0px !important;
+  box-shadow: none !important;
+  position: relative !important;
+  z-index: 10 !important;
+}
+
+/* Outward curve top-right */
+.sidebar-active-tab::before {
+  content: '';
+  position: absolute;
+  right: -2px !important;
+  top: -16px;
+  width: 16px;
+  height: 16px;
+  background-color: transparent;
+  border-bottom-right-radius: 16px;
+  box-shadow: 6px 6px 0 0 #ffffff;
+  pointer-events: none;
+  z-index: 5;
+}
+
+/* Outward curve bottom-right */
+.sidebar-active-tab::after {
+  content: '';
+  position: absolute;
+  right: -2px !important;
+  bottom: -16px;
+  width: 16px;
+  height: 16px;
+  background-color: transparent;
+  border-top-right-radius: 16px;
+  box-shadow: 6px -6px 0 0 #ffffff;
+  pointer-events: none;
+  z-index: 5;
+}
+
+/* ==========================================================================
+   Dashboard Light Theme Override System
+   ========================================================================== */
+
+.dashboard-light-theme {
+  --light-bg: #ebf6f7; /* light pastel mint */
+  --light-card-bg: #ffffff;
+  --light-card-border: #e2e8f0; /* slate-200 */
+  --light-text-main: #0f172a; /* slate-900 */
+  --light-text-secondary: #334155; /* slate-700 */
+  --light-text-muted: #64748b; /* slate-500 */
+}
+
+/* 1. Global backgrounds mapping */
+.dashboard-light-theme.bg-\[\#070b12\],
+.dashboard-light-theme .bg-\[\#070b12\],
+.dashboard-light-theme.bg-\[\#060814\],
+.dashboard-light-theme .bg-\[\#060814\],
+.dashboard-light-theme .bg-\[\#0d111c\],
+.dashboard-light-theme .bg-\[\#090d16\],
+.dashboard-light-theme .bg-\[\#070b14\]\/90,
+.dashboard-light-theme .bg-zinc-950 {
+  background-color: var(--light-bg) !important;
+}
+
+/* 2. Card / Box backgrounds mapping */
+.dashboard-light-theme .bg-\[\#111928\]\/40,
+.dashboard-light-theme .bg-\[\#111928\]\/60,
+.dashboard-light-theme .bg-\[\#111928\]\/95,
+.dashboard-light-theme .bg-\[\#111928\]\/30,
+.dashboard-light-theme .bg-\[\#111928\]\/20,
+.dashboard-light-theme .bg-\[\#111928\]\/50,
+.dashboard-light-theme .bg-\[\#111928\],
+.dashboard-light-theme .bg-\[\#0e1325\]\/40,
+.dashboard-light-theme .bg-\[\#0e1325\]\/95,
+.dashboard-light-theme .bg-\[\#0e1325\]\/55,
+.dashboard-light-theme .bg-\[\#0c1220\],
+.dashboard-light-theme .bg-\[\#131b2e\],
+.dashboard-light-theme .bg-\[\#0c1220\]\/80,
+.dashboard-light-theme .bg-\[\#0e1327\]\/40,
+.dashboard-light-theme .bg-zinc-900\/50,
+.dashboard-light-theme .bg-zinc-950\/40,
+.dashboard-light-theme .bg-\[\#1e293b\]\/20,
+.dashboard-light-theme .bg-\[\#1e293b\]\/30,
+.dashboard-light-theme .bg-zinc-800\/40,
+.dashboard-light-theme .bg-zinc-900,
+.dashboard-light-theme .bg-zinc-800 {
+  background-color: var(--light-card-bg) !important;
+}
+
+/* Keep solid colored gradient cards intact */
+.dashboard-light-theme .bg-gradient-to-br[class*="from-cyan-"],
+.dashboard-light-theme .bg-gradient-to-br[class*="from-emerald-"],
+.dashboard-light-theme .bg-gradient-to-br[class*="from-purple-"],
+.dashboard-light-theme .bg-gradient-to-br[class*="from-amber-"],
+.dashboard-light-theme .bg-gradient-to-br[class*="from-blue-"],
+.dashboard-light-theme .bg-gradient-to-br[class*="from-red-"],
+.dashboard-light-theme .bg-gradient-to-br[class*="from-pink-"] {
+  background-color: transparent !important; /* Let gradient color control it */
+}
+
+/* 3. Borders overrides */
+.dashboard-light-theme .border-zinc-800,
+.dashboard-light-theme .border-zinc-800\/80,
+.dashboard-light-theme .border-zinc-800\/60,
+.dashboard-light-theme .border-zinc-800\/40,
+.dashboard-light-theme .border-zinc-800\/50,
+.dashboard-light-theme .border-zinc-700\/50,
+.dashboard-light-theme .border-zinc-800\/60,
+.dashboard-light-theme .border-white\/5,
+.dashboard-light-theme .border-white\/10,
+.dashboard-light-theme .border-white\/15 {
+  border-color: var(--light-card-border) !important;
+}
+
+/* Overriding cyan/emerald stats card borders for light theme to look clean */
+.dashboard-light-theme .border-cyan-500\/35,
+.dashboard-light-theme .border-emerald-500\/35,
+.dashboard-light-theme .border-purple-500\/35,
+.dashboard-light-theme .border-amber-500\/35,
+.dashboard-light-theme .border-cyan-500\/30,
+.dashboard-light-theme .border-emerald-500\/30,
+.dashboard-light-theme .border-purple-500\/30,
+.dashboard-light-theme .border-amber-500\/30 {
+  border-color: var(--light-card-border) !important;
+}
+
+/* 4. Text color overrides (excluding sidebar-container and buttons) */
+.dashboard-light-theme :not(.sidebar-container) .text-zinc-100,
+.dashboard-light-theme :not(.sidebar-container) .text-zinc-200,
+.dashboard-light-theme :not(.sidebar-container) :not(.bg-primary-accent):not([class*="bg-emerald-"]):not([class*="bg-violet-"]):not([class*="bg-red-"]):not([class*="bg-blue-"]):not([class*="bg-cyan-"]):not([class*="bg-purple-"]):not([class*="bg-amber-"]) > .text-white,
+.dashboard-light-theme :not(.sidebar-container) :not(.bg-primary-accent):not([class*="bg-emerald-"]):not([class*="bg-violet-"]):not([class*="bg-red-"]):not([class*="bg-blue-"]):not([class*="bg-cyan-"]):not([class*="bg-purple-"]):not([class*="bg-amber-"]) > span.text-white {
+  color: var(--light-text-main) !important; /* Premium dark black for main text */
+}
+
+.dashboard-light-theme :not(.sidebar-container) .text-zinc-300 {
+  color: var(--light-text-secondary) !important;
+}
+
+.dashboard-light-theme :not(.sidebar-container) h1.text-white,
+.dashboard-light-theme :not(.sidebar-container) h2.text-white,
+.dashboard-light-theme :not(.sidebar-container) h3.text-white,
+.dashboard-light-theme :not(.sidebar-container) h4.text-white,
+.dashboard-light-theme :not(.sidebar-container) .font-extrabold.text-white {
+  color: var(--light-text-main) !important;
+}
+
+.dashboard-light-theme :not(.sidebar-container) .text-zinc-400,
+.dashboard-light-theme :not(.sidebar-container) .text-zinc-450 {
+  color: var(--light-text-muted) !important; /* Premium soft slate-500 for titles */
+}
+
+.dashboard-light-theme :not(.sidebar-container) .text-zinc-500,
+.dashboard-light-theme :not(.sidebar-container) .text-zinc-650 {
+  color: #94a3b8 !important; /* Light slate-400 for subtext */
+}
+
+/* Heading with text-gradient override (Dashboard header text) */
+.dashboard-light-theme h1.text-transparent {
+  background-clip: unset !important;
+  -webkit-background-clip: unset !important;
+  color: var(--light-text-main) !important;
+  background-image: none !important;
+}
+
+/* 5. Inputs / Selects styling under Light Theme */
+.dashboard-light-theme input,
+.dashboard-light-theme select,
+.dashboard-light-theme textarea {
+  background-color: #f8fafc !important;
+  color: var(--light-text-main) !important;
+  border: 1px solid #cbd5e1 !important;
+}
+.dashboard-light-theme input::placeholder,
+.dashboard-light-theme textarea::placeholder {
+  color: #94a3b8 !important;
+}
+.dashboard-light-theme select option {
+  background-color: #ffffff !important;
+  color: var(--light-text-main) !important;
+}
+
+/* 6. Active state status text mapping (light green/red/purple for contrast) */
+.dashboard-light-theme .text-emerald-400 {
+  color: #047857 !important; /* emerald-700 */
+}
+.dashboard-light-theme .text-red-400 {
+  color: #b91c1c !important; /* red-700 */
+}
+.dashboard-light-theme .text-purple-400 {
+  color: #6d28d9 !important; /* purple-700 */
+}
+.dashboard-light-theme .text-blue-400 {
+  color: #1d4ed8 !important; /* blue-700 */
+}
+.dashboard-light-theme .text-amber-400 {
+  color: #b45309 !important; /* amber-700 */
+}
+.dashboard-light-theme .text-cyan-400 {
+  color: #0369a1 !important; /* cyan-700 */
+}
+
+/* 7. Icon background wrappers mapping (Stats cards top-right rounded icons) */
+.dashboard-light-theme .bg-\[\#0d1222\]\/80 {
+  background-color: #f1f5f9 !important; /* slate-100 */
+}
+
+/* 8. Table overrides */
+.dashboard-light-theme table tr.bg-\[\#111928\]\/50 {
+  background-color: #f8fafc !important; /* slate-50 */
+}
+.dashboard-light-theme table tr {
+  border-bottom: 1px solid var(--light-card-border) !important;
+}
+
+/* 9. Dropdown panel overrides */
+.dashboard-light-theme .bg-\[\#111928\]\/95 {
+  background-color: #ffffff !important;
+  box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05) !important;
+}
+
+/* 10. Sidebar clean styles (make collapse toggle readable in light mode) */
+.sidebar-container button[aria-label="Toggle Sidebar"] {
+  background-color: #ffffff !important;
+  border-color: #e2e8f0 !important;
+}
+
+/* 11. Modal backdrops and dialog overlays under light theme */
+.dashboard-light-theme .bg-zinc-950\/80,
+.dashboard-light-theme .bg-zinc-950\/70 {
+  background-color: rgba(15, 23, 42, 0.40) !important; /* Slate backdrop overlay */
+}
+
+/* 12. DevSwitcher Sandbox Control Button text */
+.dashboard-light-theme button[title="Sandbox Controls"] svg {
+  color: #ffffff !important;
+}
+
+/* 13. Advanced Loader Stage SVG container override */
+.dashboard-light-theme .from-\[\#0e1327\]\/40 {
+  background-image: none !important;
+  background-color: #ffffff !important;
+}
+
+/* 14. Sidebar Active Curved Tab Light Theme Background Overrides */
+.dashboard-light-theme .sidebar-active-tab {
+  background-color: var(--light-bg) !important;
+}
+.dashboard-light-theme .sidebar-active-tab::before {
+  box-shadow: 6px 6px 0 0 var(--light-bg) !important;
+}
+.dashboard-light-theme .sidebar-active-tab::after {
+  box-shadow: 6px -6px 0 0 var(--light-bg) !important;
+}
+
+
+
 

@@ -3,7 +3,7 @@
 import React, { useState, useEffect } from "react";
 import { usePathname, useRouter } from "next/navigation";
 import Sidebar from "./Sidebar";
-import { getCurrentUser, setCurrentUser, getUsers } from "../utils/db";
+import { getCurrentUser, setCurrentUser, getUsers, logout } from "../utils/db";
 import DonationLoader from "./DonationLoader";
 
 export default function DashboardLayout({ children }) {
@@ -13,6 +13,30 @@ export default function DashboardLayout({ children }) {
   const [currentUser, setSessionUser] = useState(null);
   const [isClient, setIsClient] = useState(false);
   const [showDevSwitcher, setShowDevSwitcher] = useState(false);
+  const [themeMode, setThemeMode] = useState("light");
+  const [accentColor, setAccentColor] = useState("#007e8a");
+  const [accentGradient, setAccentGradient] = useState("");
+
+  const getPageTitle = (path) => {
+    const p = path.toLowerCase();
+    if (p.endsWith("/theme")) return "Appearance";
+    if (p.endsWith("/settings")) return "Settings";
+    if (p.endsWith("/users")) return "Users List";
+    if (p.endsWith("/createuser")) return "Create User";
+    if (p.endsWith("/pending-donations")) return "Pending Donations";
+    if (p.endsWith("/my-donations")) return "My Donations";
+    if (p.endsWith("/donations-history")) return "Donations History";
+    if (p.endsWith("/donations-history/monthly")) return "Monthly Report";
+    if (p.endsWith("/fund-overview") || p.includes("/fund-management")) return "Fund Management";
+    if (p.endsWith("/reports")) return "Reports";
+    if (p.endsWith("/audit-logs")) return "Audit Logs";
+    return "Overview";
+  };
+
+  const handleLogout = () => {
+    logout();
+    router.push("/");
+  };
 
   // Set client flag and verify session
   useEffect(() => {
@@ -37,6 +61,30 @@ export default function DashboardLayout({ children }) {
       window.removeEventListener("chhapi_session_update", handleSessionUpdate);
     };
   }, [router]);
+
+  // Handle Light/Dark Mode based on selected accent color
+  useEffect(() => {
+    const checkThemeMode = () => {
+      const savedColor = localStorage.getItem("sidebar-accent-color");
+      const savedGradient = localStorage.getItem("sidebar-accent-gradient");
+      
+      if (savedColor) {
+        setAccentColor(savedColor);
+      }
+      setAccentGradient(savedGradient || "");
+
+      if (savedColor === "#0f172a" || savedColor === "#0F172A") {
+        setThemeMode("dark");
+      } else {
+        setThemeMode("light");
+      }
+    };
+    checkThemeMode();
+    window.addEventListener("accent-color-change", checkThemeMode);
+    return () => {
+      window.removeEventListener("accent-color-change", checkThemeMode);
+    };
+  }, []);
 
   // Automatically close mobile menu when path change occurs
   useEffect(() => {
@@ -69,7 +117,7 @@ export default function DashboardLayout({ children }) {
   }
 
   return (
-    <div className="flex h-screen bg-[#070b12] text-zinc-100 font-sans overflow-hidden relative">
+    <div className={`${themeMode === "light" ? "dashboard-light-theme" : ""} flex h-screen bg-[#070b12] text-zinc-100 font-sans overflow-hidden relative`}>
       
       {/* Sidebar Wrapper: Sliding Drawer on Mobile, Persistent Sidebar on Desktop */}
       <div className={`
@@ -101,6 +149,40 @@ export default function DashboardLayout({ children }) {
 
       {/* Main Content Area */}
       <div className="flex-1 flex flex-col overflow-y-auto relative">
+        
+        {/* Desktop Top Header Bar */}
+        <div
+          style={{
+            backgroundColor: accentGradient ? undefined : accentColor,
+            backgroundImage: accentGradient || undefined,
+          }}
+          className="hidden lg:flex h-[70px] items-center justify-between px-8 border-b border-white/10 shrink-0 text-white shadow-md transition-all duration-300 select-none z-20"
+        >
+          <div className="flex items-center">
+            <button
+              onClick={() => window.dispatchEvent(new Event("sidebar-toggle"))}
+              className="mr-5 text-white/80 hover:text-white transition-colors cursor-pointer hover:scale-105 active:scale-95 duration-200"
+              aria-label="Toggle Sidebar"
+            >
+              <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
+                <path strokeLinecap="round" strokeLinejoin="round" d="M4 6h16M4 12h16M4 18h16" />
+              </svg>
+            </button>
+            <span className="text-xl font-bold tracking-tight">
+              {getPageTitle(pathname)}
+            </span>
+          </div>
+
+          <button
+            onClick={handleLogout}
+            className="flex items-center gap-2.5 px-4.5 py-2.5 bg-white text-red-600 border border-red-100 hover:border-red-400 hover:bg-red-50 rounded-2xl text-xs font-bold transition-all shadow-md active:scale-95 cursor-pointer shrink-0"
+          >
+            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2.8} stroke="currentColor" className="w-4 h-4">
+              <path strokeLinecap="round" strokeLinejoin="round" d="M15.75 9V5.25A2.25 2.25 0 0 0 13.5 3h-6a2.25 2.25 0 0 0-2.25 2.25v13.5A2.25 2.25 0 0 0 7.5 21h6a2.25 2.25 0 0 0 2.25-2.25V15M12 9l-3 3m0 0l3 3m-3-3h12.75" />
+            </svg>
+            <span>Logout</span>
+          </button>
+        </div>
         
         {/* Mobile Header Bar */}
         <div className="flex lg:hidden items-center justify-between px-6 py-4 border-b border-zinc-800/60 bg-[#0c1220]/80 backdrop-blur-md sticky top-0 z-30">

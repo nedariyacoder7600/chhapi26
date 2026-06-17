@@ -14,7 +14,8 @@ export default function Sidebar() {
   const [userDropdownOpen, setUserDropdownOpen] = useState(true);
   const [donationsDropdownOpen, setDonationsDropdownOpen] = useState(false);
   const [fundDropdownOpen, setFundDropdownOpen] = useState(false);
-  const [accentColor, setAccentColor] = useState("#4a154b");
+  const [accentColor, setAccentColor] = useState("#007e8a");
+  const [accentGradient, setAccentGradient] = useState("");
 
   useEffect(() => {
     // Load active session
@@ -24,20 +25,33 @@ export default function Sidebar() {
     }
 
     const savedColor = localStorage.getItem("sidebar-accent-color");
+    const savedGradient = localStorage.getItem("sidebar-accent-gradient");
     if (savedColor) {
       setAccentColor(savedColor);
       document.documentElement.style.setProperty("--primary-accent", savedColor);
     }
+    if (savedGradient) {
+      setAccentGradient(savedGradient);
+    }
 
     const handleColorChange = () => {
       const savedColor = localStorage.getItem("sidebar-accent-color");
+      const savedGradient = localStorage.getItem("sidebar-accent-gradient");
       if (savedColor) {
         setAccentColor(savedColor);
       }
+      setAccentGradient(savedGradient || "");
     };
+    
+    const handleSidebarToggle = () => {
+      setIsCollapsed((prev) => !prev);
+    };
+
     window.addEventListener("accent-color-change", handleColorChange);
+    window.addEventListener("sidebar-toggle", handleSidebarToggle);
     return () => {
       window.removeEventListener("accent-color-change", handleColorChange);
+      window.removeEventListener("sidebar-toggle", handleSidebarToggle);
     };
   }, []);
 
@@ -74,88 +88,79 @@ export default function Sidebar() {
   const isSettingsActive = pathname === `${basePath}/settings`;
   const isThemeActive = pathname === `${basePath}/Theme` || pathname === `${basePath}/theme`;
 
-  const getLinkClass = (isActive) => {
-    return `relative flex items-center rounded-xl transition-all duration-300 group cursor-pointer ${
-      isCollapsed ? "justify-center w-12 h-12 mx-auto" : "gap-4 px-4 py-3"
-    } ${
+  const getLinkClass = (isActive, isSubItem = false) => {
+    if (isCollapsed) {
+      return `relative flex items-center justify-center w-12 h-12 mx-auto rounded-xl transition-all duration-300 group cursor-pointer ${
+        isActive
+          ? "bg-white text-teal-850 shadow-lg"
+          : "text-white/60 hover:text-white hover:bg-white/[0.08]"
+      }`;
+    }
+
+    if (isActive) {
+      return `relative flex items-center gap-4 py-3 pl-5 pr-0 cursor-pointer transition-all duration-300 sidebar-active-tab ${
+        isSubItem ? "ml-8" : "ml-4"
+      }`;
+    }
+
+    return `relative flex items-center gap-4 py-3 px-5 transition-all duration-300 group cursor-pointer rounded-l-full ${
+      isSubItem ? "ml-8 text-white/50 hover:text-white" : "ml-4 text-white/70 hover:text-white"
+    } hover:bg-white/[0.04]`;
+  };
+
+  const getParentClass = (isActive) => {
+    if (isCollapsed) {
+      return `relative flex items-center justify-center w-12 h-12 mx-auto rounded-xl transition-all duration-300 group cursor-pointer ${
+        isActive
+          ? "bg-white/10 text-white"
+          : "text-white/60 hover:text-white hover:bg-white/[0.08]"
+      }`;
+    }
+
+    return `relative flex items-center justify-between gap-4 py-3 px-5 ml-4 rounded-l-full transition-all duration-300 group cursor-pointer ${
       isActive
-        ? "bg-white/[0.08] text-white border border-white/10 shadow-[0_4px_20px_rgba(0,0,0,0.15)]"
-        : "text-white/60 hover:text-white hover:bg-white/[0.03] border border-transparent"
+        ? "text-white bg-white/10 font-bold"
+        : "text-white/70 hover:text-white hover:bg-white/[0.04]"
     }`;
   };
 
   const renderLeftIndicator = (isActive) => {
-    if (!isActive) return null;
-    const offsetLeft = isCollapsed ? "-21px" : "-16px";
-    return (
-      <span
-        className="absolute w-[3px] rounded-r-full transition-all duration-300"
-        style={{
-          left: offsetLeft,
-          top: "12px",
-          bottom: "12px",
-          backgroundColor: accentColor,
-          boxShadow: `0 0 10px ${accentColor}, 0 0 20px ${accentColor}`,
-        }}
-      />
-    );
+    return null;
   };
 
   return (
     <div
       style={{
-        background: `linear-gradient(180deg, ${accentColor}cc 0%, rgba(8, 12, 21, 0.95) 100%)`,
-        backdropFilter: "blur(24px)",
-        WebkitBackdropFilter: "blur(24px)",
+        backgroundColor: accentGradient ? undefined : accentColor,
+        backgroundImage: accentGradient || undefined,
       }}
-      className={`text-white h-full min-h-screen flex flex-col justify-between font-sans border-r border-white/5 shrink-0 relative transition-all duration-300 shadow-[4px_0_24px_rgba(0,0,0,0.3)] ${
+      className={`sidebar-container text-white h-full min-h-screen flex flex-col justify-between font-sans border-r border-white/5 shrink-0 relative transition-all duration-300 shadow-[4px_0_24px_rgba(0,0,0,0.3)] ${
         isCollapsed ? "w-[90px]" : "w-[320px]"
       }`}
     >
-      {/* Collapse Toggle */}
-      <button
-        onClick={() => setIsCollapsed(!isCollapsed)}
-        className="absolute -right-4 top-8 z-50 w-8 h-8 bg-[#0f1422] text-zinc-400 hover:text-white rounded-full border border-zinc-800 shadow-2xl hidden lg:flex items-center justify-center cursor-pointer hover:scale-115 active:scale-95 transition-all group"
-        aria-label="Toggle Sidebar"
-      >
-        {isCollapsed ? (
-          <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2.5} stroke="currentColor" className="w-4 h-4 group-hover:translate-x-0.5 transition-transform" style={{ color: accentColor }}>
-            <path strokeLinecap="round" strokeLinejoin="round" d="m8.25 4.5 7.5 7.5-7.5 7.5" />
-          </svg>
-        ) : (
-          <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2.5} stroke="currentColor" className="w-4 h-4 group-hover:-translate-x-0.5 transition-transform" style={{ color: accentColor }}>
-            <path strokeLinecap="round" strokeLinejoin="round" d="M15.75 19.5 8.25 12l7.5-7.5" />
-          </svg>
-        )}
-      </button>
+
 
       {/* Top Brand Section */}
-      <div className="p-6 border-b border-white/5">
+      <div className="p-6">
         <div className={`flex items-center ${isCollapsed ? "justify-center" : "gap-4"}`}>
           {isCollapsed ? (
             <div
-              className="w-12 h-12 rounded-2xl overflow-hidden flex items-center justify-center border border-white/15 shrink-0 transition-all duration-300 hover:scale-105"
-              style={{
-                boxShadow: `0 8px 24px -6px ${accentColor}40`
-              }}
+              className="w-12 h-12 rounded-2xl overflow-hidden flex items-center justify-center border border-white/15 shrink-0 transition-all duration-300 hover:scale-105 shadow-lg"
               title="Chhapi Donation"
             >
               <img src="/logo.png" alt="Chhapi Donation Logo" className="w-full h-full object-cover" />
             </div>
           ) : (
-            <div className="flex items-center gap-3 animate-[fadeIn_0.2s_ease-out] w-full">
-              <img src="/logo.png" alt="Chhapi Donation Logo" className="w-10 h-10 rounded-full border border-white/10 shrink-0 object-cover" />
+            <div className="flex items-center gap-3.5 animate-[fadeIn_0.2s_ease-out] w-full">
+              <div className="w-11 h-11 rounded-2xl overflow-hidden flex items-center justify-center border border-white/10 shrink-0 shadow-lg bg-white/10">
+                <img src="/logo.png" alt="Chhapi Donation Logo" className="w-full h-full object-cover" />
+              </div>
               <div className="flex flex-col min-w-0">
-                <span className="text-[17px] font-extrabold tracking-wide leading-tight bg-gradient-to-r from-white via-white/95 to-white/80 bg-clip-text text-transparent truncate">
+                <span className="text-xl font-extrabold tracking-tight text-white truncate">
                   Chhapi Donation
                 </span>
                 <span
-                  className="text-[9px] font-bold tracking-widest uppercase mt-1 px-2 py-0.5 rounded-md w-fit"
-                  style={{
-                    backgroundColor: `${accentColor}25`,
-                    color: accentColor,
-                    border: `1px solid ${accentColor}35`
-                  }}
+                  className="text-[9px] font-bold tracking-widest uppercase mt-0.5 px-1.5 py-0.5 rounded bg-white/15 text-white/90 border border-white/5 w-fit"
                 >
                   {role.replace("_", " ")}
                 </span>
@@ -166,11 +171,12 @@ export default function Sidebar() {
       </div>
 
       {/* Navigation Links */}
-      <div className={`flex-1 flex flex-col gap-2 overflow-y-auto no-scrollbar ${isCollapsed ? "px-3 py-6" : "px-4 py-4"}`}>
+      <div className={`flex-1 flex flex-col gap-2 overflow-y-auto no-scrollbar ${isCollapsed ? "px-3 py-6" : "py-4"}`}>
         {/* Dashboard */}
         <a
           href={basePath}
-          className={getLinkClass(isDashboardActive)}
+          className={getLinkClass(isDashboardActive, false)}
+          style={{ color: isDashboardActive && !isCollapsed ? accentColor : undefined }}
           title={isCollapsed ? "Dashboard" : undefined}
         >
           {renderLeftIndicator(isDashboardActive)}
@@ -189,10 +195,9 @@ export default function Sidebar() {
           <div>
             <button
               onClick={() => !isCollapsed && setUserDropdownOpen(!userDropdownOpen)}
-              className={getLinkClass(isUserMgmtActive)}
+              className={getParentClass(isUserMgmtActive)}
               title={isCollapsed ? "User Management" : undefined}
             >
-              {renderLeftIndicator(isUserMgmtActive)}
               <div className="flex items-center gap-4">
                 <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor" className="w-5 h-5 shrink-0 transition-transform duration-200 group-hover:scale-115">
                   <path strokeLinecap="round" strokeLinejoin="round" d="M15 19.128a9.38 9.38 0 0 0 2.625.372 9.337 9.337 0 0 0 4.121-.952 4.125 4.125 0 0 0-7.533-2.493M15 19.128v-.003c0-1.113-.285-2.16-.786-3.07M15 19.128v.109A11.386 11.386 0 0 1 10.089 21c-2.243 0-4.32-.647-6.079-1.758 1.935-1.921 4.673-3.113 7.68-3.113 1.956 0 3.791.493 5.4 1.361M15 8.75a3 3 0 1 1-6 0 3 3 0 0 1 6 0ZM19.5 12a2.25 2.25 0 1 1-4.5 0 2.25 2.25 0 0 1 4.5 0Z" />
@@ -218,14 +223,11 @@ export default function Sidebar() {
             </button>
 
             {!isCollapsed && userDropdownOpen && (
-              <div className="ml-9 pl-4 my-1.5 flex flex-col gap-1 border-l border-white/10 animate-[fadeIn_0.15s_ease-out]">
+              <div className="mt-1.5 flex flex-col gap-1 animate-[fadeIn_0.15s_ease-out]">
                 <a
                   href={`${basePath}/createuser`}
-                  className={`py-2 px-3 rounded-lg text-sm transition-all duration-200 flex items-center gap-2.5 relative hover:translate-x-1 ${
-                    pathname === `${basePath}/createuser`
-                      ? "text-white font-semibold bg-white/5 border border-white/5 shadow-sm"
-                      : "text-white/60 hover:text-white hover:bg-white/[0.02]"
-                  }`}
+                  className={getLinkClass(pathname === `${basePath}/createuser`, true)}
+                  style={{ color: pathname === `${basePath}/createuser` && !isCollapsed ? accentColor : undefined }}
                 >
                   <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor" className="w-4 h-4 opacity-70 shrink-0">
                     <path strokeLinecap="round" strokeLinejoin="round" d="M18 7.5v3m0 0v3m0-3h3m-3 0h-3m-2.25-4.125a3.375 3.375 0 1 1-6.75 0 3.375 3.375 0 0 1 6.75 0ZM3 19.235v-.11a6.375 6.375 0 0 1 12.75 0v.109A12.318 12.318 0 0 1 9.374 21c-2.331 0-4.512-.647-6.374-1.758Z" />
@@ -234,11 +236,8 @@ export default function Sidebar() {
                 </a>
                 <a
                   href={`${basePath}/users`}
-                  className={`py-2 px-3 rounded-lg text-sm transition-all duration-200 flex items-center gap-2.5 relative hover:translate-x-1 ${
-                    pathname === `${basePath}/users`
-                      ? "text-white font-semibold bg-white/5 border border-white/5 shadow-sm"
-                      : "text-white/60 hover:text-white hover:bg-white/[0.02]"
-                  }`}
+                  className={getLinkClass(pathname === `${basePath}/users`, true)}
+                  style={{ color: pathname === `${basePath}/users` && !isCollapsed ? accentColor : undefined }}
                 >
                   <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor" className="w-4 h-4 opacity-70 shrink-0">
                     <path strokeLinecap="round" strokeLinejoin="round" d="M8.25 6.75h12M8.25 12h12m-12 5.25h12M3.75 6.75h.007v.008H3.75V6.75Zm.375 0a.375.375 0 1 1-.75 0 .375.375 0 0 1 .75 0ZM3.75 12h.007v.008H3.75V12Zm.375 0a.375.375 0 1 1-.75 0 .375.375 0 0 1 .75 0Zm-.375 5.25h.007v.008H3.75v-.008Zm.375 0a.375.375 0 1 1-.75 0 .375.375 0 0 1 .75 0Z" />
@@ -248,11 +247,8 @@ export default function Sidebar() {
                 {role === "SUPER_ADMIN" ? (
                   <a
                     href={`${basePath}/pending-donations`}
-                    className={`py-2 px-3 rounded-lg text-sm transition-all duration-200 flex items-center gap-2.5 relative hover:translate-x-1 ${
-                      pathname === `${basePath}/pending-donations`
-                        ? "text-white font-semibold bg-white/5 border border-white/5 shadow-sm"
-                        : "text-white/60 hover:text-white hover:bg-white/[0.02]"
-                    }`}
+                    className={getLinkClass(pathname === `${basePath}/pending-donations`, true)}
+                    style={{ color: pathname === `${basePath}/pending-donations` && !isCollapsed ? accentColor : undefined }}
                   >
                     <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor" className="w-4 h-4 opacity-70 shrink-0">
                       <path strokeLinecap="round" strokeLinejoin="round" d="M12 6v6h4.5m4.5 0a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z" />
@@ -262,11 +258,8 @@ export default function Sidebar() {
                 ) : role === "ADMIN" ? (
                   <a
                     href={`${basePath}/my-donations`}
-                    className={`py-2 px-3 rounded-lg text-sm transition-all duration-200 flex items-center gap-2.5 relative hover:translate-x-1 ${
-                      pathname === `${basePath}/my-donations`
-                        ? "text-white font-semibold bg-white/5 border border-white/5 shadow-sm"
-                        : "text-white/60 hover:text-white hover:bg-white/[0.02]"
-                    }`}
+                    className={getLinkClass(pathname === `${basePath}/my-donations`, true)}
+                    style={{ color: pathname === `${basePath}/my-donations` && !isCollapsed ? accentColor : undefined }}
                   >
                     <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor" className="w-4 h-4 opacity-70 shrink-0">
                       <path strokeLinecap="round" strokeLinejoin="round" d="M9 12h3.75M9 15h3.375m1.875-10.378a3 3 0 0 1 3 3v11.25a3 3 0 0 1-3 3h-9.75a3 3 0 0 1-3-3V7.622a3 3 0 0 1 3-3h9.75ZM9.75 9.75H12v2.25H9.75v-2.25Z" />
@@ -278,11 +271,8 @@ export default function Sidebar() {
                   <>
                     <a
                       href={`${basePath}/reports`}
-                      className={`py-2 px-3 rounded-lg text-sm transition-all duration-200 flex items-center gap-2.5 relative hover:translate-x-1 ${
-                        pathname === `${basePath}/reports`
-                          ? "text-white font-semibold bg-white/5 border border-white/5 shadow-sm"
-                          : "text-white/60 hover:text-white hover:bg-white/[0.02]"
-                      }`}
+                      className={getLinkClass(pathname === `${basePath}/reports`, true)}
+                      style={{ color: pathname === `${basePath}/reports` && !isCollapsed ? accentColor : undefined }}
                     >
                       <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor" className="w-4 h-4 opacity-70 shrink-0">
                         <path strokeLinecap="round" strokeLinejoin="round" d="M19.5 14.25v-2.625a3.375 3.375 0 0 0-3.375-3.375h-1.5A1.125 1.125 0 0 1 13.5 7.125v-1.5a3.375 3.375 0 0 0-3.375-3.375H8.25m3.75 9v6m3-3H9m1.5-12H5.625c-.621 0-1.125.504-1.125 1.125v17.25c0 .621.504 1.125 1.125 1.125h12.75c.621 0 1.125-.504 1.125-1.125V11.25a9 9 0 0 0-9-9Z" />
@@ -291,11 +281,8 @@ export default function Sidebar() {
                     </a>
                     <a
                       href={`${basePath}/audit-logs`}
-                      className={`py-2 px-3 rounded-lg text-sm transition-all duration-200 flex items-center gap-2.5 relative hover:translate-x-1 ${
-                        pathname === `${basePath}/audit-logs`
-                          ? "text-white font-semibold bg-white/5 border border-white/5 shadow-sm"
-                          : "text-white/60 hover:text-white hover:bg-white/[0.02]"
-                      }`}
+                      className={getLinkClass(pathname === `${basePath}/audit-logs`, true)}
+                      style={{ color: pathname === `${basePath}/audit-logs` && !isCollapsed ? accentColor : undefined }}
                     >
                       <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor" className="w-4 h-4 opacity-70 shrink-0">
                         <path strokeLinecap="round" strokeLinejoin="round" d="M9 12h6m-6 4h6m2 5H7a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5.586a1 1 0 0 1 .707.293l5.414 5.414a1 1 0 0 1 .293.707V19a2 2 0 0 1-2 2Z" />
@@ -311,7 +298,8 @@ export default function Sidebar() {
           /* Regular User Claims Menu (no dropdown) */
           <a
             href={`${basePath}/pending-donations`}
-            className={getLinkClass(isClaimsActive)}
+            className={getLinkClass(isClaimsActive, false)}
+            style={{ color: isClaimsActive && !isCollapsed ? accentColor : undefined }}
             title={isCollapsed ? "My Claims" : undefined}
           >
             {renderLeftIndicator(isClaimsActive)}
@@ -330,10 +318,9 @@ export default function Sidebar() {
         <div>
           <button
             onClick={() => !isCollapsed && setDonationsDropdownOpen(!donationsDropdownOpen)}
-            className={getLinkClass(isDonationsActive)}
+            className={getParentClass(isDonationsActive)}
             title={isCollapsed ? "Donations History" : undefined}
           >
-            {renderLeftIndicator(isDonationsActive)}
             <div className="flex items-center gap-4">
               <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor" className="w-5 h-5 shrink-0 transition-transform duration-200 group-hover:scale-115">
                 <path strokeLinecap="round" strokeLinejoin="round" d="M20.25 7.5l-.625 10.632a2.25 2.25 0 01-2.247 2.118H6.622a2.25 2.25 0 01-2.247-2.118L3.75 7.5M10 11.25h4M3.375 7.5h17.25c.621 0 1.125-.504 1.125-1.125v-1.5c0-.621-.504-1.125-1.125-1.125H3.375c-.621 0-1.125.504-1.125 1.125v1.5c0 .621.504 1.125 1.125 1.125z" />
@@ -359,14 +346,11 @@ export default function Sidebar() {
           </button>
 
           {!isCollapsed && donationsDropdownOpen && (
-            <div className="ml-9 pl-4 my-1.5 flex flex-col gap-1 border-l border-white/10 animate-[fadeIn_0.15s_ease-out]">
+            <div className="flex flex-col gap-1 border-l border-white/10 animate-[fadeIn_0.15s_ease-out]">
               <a
                 href={`${basePath}/donations-history`}
-                className={`py-2 px-3 rounded-lg text-sm transition-all duration-200 flex items-center gap-2.5 relative hover:translate-x-1 ${
-                  pathname === `${basePath}/donations-history`
-                    ? "text-white font-semibold bg-white/5 border border-white/5 shadow-sm"
-                    : "text-white/60 hover:text-white hover:bg-white/[0.02]"
-                }`}
+                className={getLinkClass(pathname === `${basePath}/donations-history`, true)}
+                style={{ color: pathname === `${basePath}/donations-history` && !isCollapsed ? accentColor : undefined }}
               >
                 <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor" className="w-4 h-4 opacity-70 shrink-0">
                   <path strokeLinecap="round" strokeLinejoin="round" d="M9 12h3.75M9 15h3.375m1.875-10.378a3 3 0 0 1 3 3v11.25a3 3 0 0 1-3 3h-9.75a3 3 0 0 1-3-3V7.622a3 3 0 0 1 3-3h9.75ZM9.75 9.75H12v2.25H9.75v-2.25Z" />
@@ -376,11 +360,8 @@ export default function Sidebar() {
               {role !== "USER" && (
                 <a
                   href={`${basePath}/donations-history/monthly`}
-                  className={`py-2 px-3 rounded-lg text-sm transition-all duration-200 flex items-center gap-2.5 relative hover:translate-x-1 ${
-                    pathname === `${basePath}/donations-history/monthly`
-                      ? "text-white font-semibold bg-white/5 border border-white/5 shadow-sm"
-                      : "text-white/60 hover:text-white hover:bg-white/[0.02]"
-                  }`}
+                  className={getLinkClass(pathname === `${basePath}/donations-history/monthly`, true)}
+                  style={{ color: pathname === `${basePath}/donations-history/monthly` && !isCollapsed ? accentColor : undefined }}
                 >
                   <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor" className="w-4 h-4 opacity-70 shrink-0">
                     <path strokeLinecap="round" strokeLinejoin="round" d="M6.75 3v2.25M17.25 3v2.25M3 18.75V7.5a2.25 2.25 0 0 1 2.25-2.25h13.5A2.25 2.25 0 0 1 21 7.5v11.25m-18 0A2.25 2.25 0 0 0 5.25 21h13.5A2.25 2.25 0 0 0 21 18.75m-18 0v-7.5A2.25 2.25 0 0 1 5.25 9h13.5A2.25 2.25 0 0 1 21 11.25v7.5m-9-6h.008v.008H12v-.008ZM12 15h.008v.008H12V15Zm0 2.25h.008v.008H12v-.008ZM9.75 15h.008v.008H9.75V15Zm0 2.25h.008v.008H9.75v-.008ZM7.5 15h.008v.008H7.5V15Zm0 2.25h.008v.008H7.5v-.008Zm6.75-4.5h.008v.008h-.008v-.008Zm0 2.25h.008v.008h-.008V15Zm0 2.25h.008v.008h-.008v-.008Zm2.25-4.5h.008v.008H16.5v-.008Zm0 2.25h.008v.008H16.5V15Z" />
@@ -396,10 +377,9 @@ export default function Sidebar() {
         <div>
           <button
             onClick={() => !isCollapsed && setFundDropdownOpen(!fundDropdownOpen)}
-            className={getLinkClass(isFundActive)}
+            className={getParentClass(isFundActive)}
             title={isCollapsed ? "Fund Management" : undefined}
           >
-            {renderLeftIndicator(isFundActive)}
             <div className="flex items-center gap-4">
               <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor" className="w-5 h-5 shrink-0 transition-transform duration-200 group-hover:scale-115">
                 <path strokeLinecap="round" strokeLinejoin="round" d="M12 21v-8.25M15.75 21v-8.25M8.25 21v-8.25M3 9l9-6 9 6m-1.5 12V10.25H4.5V21m-1.5 0h18" />
@@ -425,14 +405,11 @@ export default function Sidebar() {
           </button>
 
           {!isCollapsed && fundDropdownOpen && (
-            <div className="ml-9 pl-4 my-1.5 flex flex-col gap-1 border-l border-white/10 animate-[fadeIn_0.15s_ease-out]">
+            <div className="flex flex-col gap-1 border-l border-white/10 animate-[fadeIn_0.15s_ease-out]">
               <a
                 href={`${basePath}/fund-management/summary`}
-                className={`py-2 px-3 rounded-lg text-sm transition-all duration-200 flex items-center gap-2.5 relative hover:translate-x-1 ${
-                  pathname === `${basePath}/fund-management/summary` || pathname === `${basePath}/fund-overview`
-                    ? "text-white font-semibold bg-white/5 border border-white/5 shadow-sm"
-                    : "text-white/60 hover:text-white hover:bg-white/[0.02]"
-                }`}
+                className={getLinkClass(pathname === `${basePath}/fund-management/summary` || pathname === `${basePath}/fund-overview`, true)}
+                style={{ color: (pathname === `${basePath}/fund-management/summary` || pathname === `${basePath}/fund-overview`) && !isCollapsed ? accentColor : undefined }}
               >
                 <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor" className="w-4 h-4 opacity-70 shrink-0">
                   <path strokeLinecap="round" strokeLinejoin="round" d="M19.5 14.25v-2.625a3.375 3.375 0 0 0-3.375-3.375h-1.5A1.125 1.125 0 0 1 13.5 7.125v-1.5a3.375 3.375 0 0 0-3.375-3.375H8.25m0 12.75h7.5m-7.5 3H12M10.5 2.25H5.625c-.621 0-1.125.504-1.125 1.125v17.25c0 .621.504 1.125 1.125 1.125h12.75c.621 0 1.125-.504 1.125-1.125V11.25a9 9 0 0 0-9-9Z" />
@@ -443,11 +420,8 @@ export default function Sidebar() {
                 <>
                   <a
                     href={`${basePath}/fund-management/create`}
-                    className={`py-2 px-3 rounded-lg text-sm transition-all duration-200 flex items-center gap-2.5 relative hover:translate-x-1 ${
-                      pathname === `${basePath}/fund-management/create`
-                        ? "text-white font-semibold bg-white/5 border border-white/5 shadow-sm"
-                        : "text-white/60 hover:text-white hover:bg-white/[0.02]"
-                    }`}
+                    className={getLinkClass(pathname === `${basePath}/fund-management/create`, true)}
+                    style={{ color: pathname === `${basePath}/fund-management/create` && !isCollapsed ? accentColor : undefined }}
                   >
                     <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor" className="w-4 h-4 opacity-70 shrink-0">
                       <path strokeLinecap="round" strokeLinejoin="round" d="M12 9v6m3-3H9m12 0a9 9 0 11-18 0 9 9 0 0118 0Z" />
@@ -456,11 +430,8 @@ export default function Sidebar() {
                   </a>
                   <a
                     href={`${basePath}/fund-management/use`}
-                    className={`py-2 px-3 rounded-lg text-sm transition-all duration-200 flex items-center gap-2.5 relative hover:translate-x-1 ${
-                      pathname === `${basePath}/fund-management/use`
-                        ? "text-white font-semibold bg-white/5 border border-white/5 shadow-sm"
-                        : "text-white/60 hover:text-white hover:bg-white/[0.02]"
-                    }`}
+                    className={getLinkClass(pathname === `${basePath}/fund-management/use`, true)}
+                    style={{ color: pathname === `${basePath}/fund-management/use` && !isCollapsed ? accentColor : undefined }}
                   >
                     <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor" className="w-4 h-4 opacity-70 shrink-0">
                       <path strokeLinecap="round" strokeLinejoin="round" d="M15 12H9m12 0a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z" />
@@ -472,11 +443,8 @@ export default function Sidebar() {
               {role !== "USER" && (
                 <a
                   href={`${basePath}/fund-management/history`}
-                  className={`py-2 px-3 rounded-lg text-sm transition-all duration-200 flex items-center gap-2.5 relative hover:translate-x-1 ${
-                    pathname === `${basePath}/fund-management/history`
-                      ? "text-white font-semibold bg-white/5 border border-white/5 shadow-sm"
-                      : "text-white/60 hover:text-white hover:bg-white/[0.02]"
-                  }`}
+                  className={getLinkClass(pathname === `${basePath}/fund-management/history`, true)}
+                  style={{ color: pathname === `${basePath}/fund-management/history` && !isCollapsed ? accentColor : undefined }}
                 >
                   <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" className="w-4 h-4 opacity-70 shrink-0">
                     <path strokeLinecap="round" strokeLinejoin="round" d="M12 6v6h4.5m4.5 0a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z" />
@@ -491,7 +459,8 @@ export default function Sidebar() {
         {/* Settings */}
         <a
           href={`${basePath}/settings`}
-          className={getLinkClass(isSettingsActive)}
+          className={getLinkClass(isSettingsActive, false)}
+          style={{ color: isSettingsActive && !isCollapsed ? accentColor : undefined }}
           title={isCollapsed ? "Settings" : undefined}
         >
           {renderLeftIndicator(isSettingsActive)}
@@ -509,7 +478,8 @@ export default function Sidebar() {
         {/* Theme Settings */}
         <a
           href={`${basePath}/Theme`}
-          className={getLinkClass(isThemeActive)}
+          className={getLinkClass(isThemeActive, false)}
+          style={{ color: isThemeActive && !isCollapsed ? accentColor : undefined }}
           title={isCollapsed ? "Appearance & Theme" : undefined}
         >
           {renderLeftIndicator(isThemeActive)}
@@ -526,7 +496,10 @@ export default function Sidebar() {
           {!isCollapsed && (
             <div
               className="w-3.5 h-3.5 rounded-full border border-white/20 shrink-0 animate-[fadeIn_0.2s_ease-out] shadow-[0_0_8px_rgba(255,255,255,0.2)]"
-              style={{ backgroundColor: accentColor }}
+              style={{
+                backgroundColor: accentGradient ? undefined : accentColor,
+                backgroundImage: accentGradient || undefined,
+              }}
             ></div>
           )}
         </a>

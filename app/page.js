@@ -124,7 +124,7 @@ export default function Home() {
   }
 
   return (
-    <div className="min-h-screen bg-[#070b12] text-zinc-100 flex flex-col justify-center items-center p-6 relative overflow-hidden font-sans">
+    <div className="dashboard-light-theme min-h-screen bg-[#070b12] text-zinc-100 flex flex-col justify-center items-center p-6 relative overflow-hidden font-sans">
       
       {/* Toast Notification Container */}
       <div className="fixed top-6 right-6 z-50 flex flex-col gap-3 max-w-md w-full pointer-events-none">

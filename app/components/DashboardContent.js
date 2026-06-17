@@ -14,6 +14,7 @@ export default function DashboardContent() {
     myTotalDonations: 0,
     myApprovedCount: 0,
     myPendingCount: 0,
+    myPendingSum: 0,
   });
 
   const [hoveredChart1, setHoveredChart1] = useState(null);
@@ -33,6 +34,8 @@ export default function DashboardContent() {
     window.open(currentUser.whatsappGroup || "https://chat.whatsapp.com/G2EHonNxcjoBwtygpTmCg4", "_blank");
   };
 
+  const [totalPendingAmount, setTotalPendingAmount] = useState(0);
+
   useEffect(() => {
     const user = getCurrentUser();
     if (user) {
@@ -49,10 +52,15 @@ export default function DashboardContent() {
       const superAdmins = users.filter((u) => u.role === "SUPER_ADMIN").length;
       const totalDonationsSum = users.reduce((sum, u) => sum + u.donations, 0);
 
+      // Pending sum
+      const totalPendingSum = pending.reduce((sum, p) => sum + p.amount, 0);
+      setTotalPendingAmount(totalPendingSum);
+
       // User specific calculations
       const myHistory = history.filter((h) => h.mobile === user.mobile);
       const myPending = pending.filter((p) => p.mobile === user.mobile);
       const myTotalDonations = myHistory.reduce((sum, h) => sum + h.amount, 0);
+      const myPendingSum = myPending.reduce((sum, p) => sum + p.amount, 0);
 
       setDbStats({
         totalUsers,
@@ -63,6 +71,7 @@ export default function DashboardContent() {
         myTotalDonations,
         myApprovedCount: myHistory.length,
         myPendingCount: myPending.length,
+        myPendingSum,
       });
 
       // Filter recent timeline claims for user
@@ -79,507 +88,280 @@ export default function DashboardContent() {
 
   const isAdmin = currentUser.role === "SUPER_ADMIN" || currentUser.role === "ADMIN";
 
-  // Chart Coordinates (Monthly Donations System-wide or User-specific)
-  const chartPoints = isAdmin 
+  // Data mapping for 5 cards based on User Role (using Title Case to match screenshot)
+  const metrics = isAdmin
     ? [
-        { label: "Jan", val: 80 },
-        { label: "Feb", val: 110 },
-        { label: "Mar", val: 95 },
-        { label: "Apr", val: 140 },
-        { label: "May", val: 160 },
-        { label: "Jun", val: 215 },
+        { label: "Total Contributors", value: dbStats.totalUsers.toLocaleString("en-IN"), isRed: false },
+        { label: "Approved Claims", value: dbStats.totalApproved.toLocaleString("en-IN"), isRed: false },
+        { label: "Moderators List", value: `${dbStats.activeAdmins} Admins`, isRed: false },
+        { label: "Monthly Collections", value: `₹${dbStats.totalDonationsSum.toLocaleString("en-IN")}`, isRed: false },
+        { label: "Pending Claims Sum", value: `₹${totalPendingAmount.toLocaleString("en-IN")}`, isRed: true },
       ]
     : [
-        { label: "Jan", val: 0 },
-        { label: "Feb", val: 2 },
-        { label: "Mar", val: 5 },
-        { label: "Apr", val: 3 },
-        { label: "May", val: 8 },
-        { label: "Jun", val: 12 }, // Scaled down points for user
-      ];
-
-  const maxVal = isAdmin ? 250 : 20;
-  const chartCoords = chartPoints.map((p, idx) => {
-    const x = 50 + (idx / 5) * 500;
-    const y = 200 - (p.val / maxVal) * 160;
-    return { x, y, ...p };
-  });
-
-  let linePath = `M ${chartCoords[0].x} ${chartCoords[0].y}`;
-  for (let i = 1; i < chartCoords.length; i++) {
-    const cpX1 = chartCoords[i - 1].x + (chartCoords[i].x - chartCoords[i - 1].x) / 3;
-    const cpY1 = chartCoords[i - 1].y;
-    const cpX2 = chartCoords[i - 1].x + (2 * (chartCoords[i].x - chartCoords[i - 1].x)) / 3;
-    const cpY2 = chartCoords[i].y;
-    linePath += ` C ${cpX1} ${cpY1}, ${cpX2} ${cpY2}, ${chartCoords[i].x} ${chartCoords[i].y}`;
-  }
-  const areaPath = `${linePath} L ${chartCoords[chartCoords.length - 1].x} 200 L ${chartCoords[0].x} 200 Z`;
-
-  // Weekly user registries (admin) or Campaign contribution breakdown (user)
-  const chart2Points = isAdmin
-    ? [
-        { label: "Wk 1", val: 12 },
-        { label: "Wk 2", val: 18 },
-        { label: "Wk 3", val: 24 },
-        { label: "Wk 4", val: 15 },
-        { label: "Wk 5", val: 29 },
-      ]
-    : [
-        { label: "Food", val: 5 },
-        { label: "Medical", val: 8 },
-        { label: "Educate", val: 15 },
-        { label: "Water", val: 4 },
-        { label: "General", val: 10 },
+        { label: "Total Claims", value: (dbStats.myApprovedCount + dbStats.myPendingCount).toString(), isRed: false },
+        { label: "Approved Claims", value: dbStats.myApprovedCount.toString(), isRed: false },
+        { label: "Registry Tier", value: "Contributor", isRed: false },
+        { label: "My Contributed Sum", value: `₹${dbStats.myTotalDonations.toLocaleString("en-IN")}`, isRed: false },
+        { label: "Awaiting Verification", value: `₹${dbStats.myPendingSum.toLocaleString("en-IN")}`, isRed: true },
       ];
 
   return (
     <div className="flex-1 flex flex-col p-6 lg:p-8 bg-[#070b12] text-zinc-100 min-h-screen">
       
-      {/* Top Header */}
-      <header className="mb-8 flex flex-col md:flex-row md:items-center md:justify-between gap-4 border-b border-zinc-800/40 pb-6">
-        <div>
-          <h1 className="text-3xl font-extrabold text-white tracking-tight sm:text-4xl bg-gradient-to-r from-white via-zinc-200 to-zinc-400 bg-clip-text text-transparent">
-            {isAdmin ? `${currentUser.role.replace("_", " ")} Dashboard` : "My Contributor Panel"}
-          </h1>
-          <p className="text-sm text-zinc-400 mt-2">
-            {isAdmin 
-              ? "Full system overview of users, donations, and reports." 
-              : `Welcome back, ${currentUser.name}. Track your contribution points and claim records.`}
-          </p>
-        </div>
+      {/* Dynamic Mobile Header Title (Desktop Title is in layout top-bar) */}
+      <div className="lg:hidden mb-6">
+        <h1 className="text-2xl font-extrabold text-white tracking-tight">
+          {isAdmin ? "Overview" : "My Contributor Panel"}
+        </h1>
+        <p className="text-xs text-zinc-400 mt-1">
+          {isAdmin 
+            ? "Full system overview of users, donations, and reports." 
+            : `Welcome back, ${currentUser.name}. Track your claims status.`}
+        </p>
+      </div>
+
+      <main className="space-y-8 flex-1 flex flex-col justify-between">
         
-        {/* Dynamic status pill */}
-        <div className="flex items-center gap-3 self-start md:self-auto bg-[#0e1325]/55 border border-zinc-800/50 px-4 py-2.5 rounded-2xl backdrop-blur-md shadow-lg">
-          <span className="w-2.5 h-2.5 rounded-full bg-emerald-500 animate-pulse"></span>
-          <span className="text-xs font-mono text-zinc-300 font-semibold uppercase tracking-wider">
-            System Online
-          </span>
-        </div>
-      </header>
-
-      {/* Dashboard Main Grid */}
-      <main className="space-y-8 flex-1 flex flex-col">
-        
-        {/* Stats Cards Row */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-          {isAdmin ? (
-            // Admin/Super Admin stats cards
-            <>
-              {/* Card 1: Total Registries */}
-              <div className="bg-gradient-to-br from-[#0e1325]/90 to-[#080c16]/95 border border-cyan-500/35 rounded-[24px] p-5 min-h-[140px] h-auto relative backdrop-blur-xl flex flex-col justify-between overflow-hidden group hover:border-cyan-400 hover:shadow-[0_0_30px_rgba(6,182,212,0.2)] transition-all duration-500 shadow-2xl">
-                <div className="absolute -top-12 -right-12 w-24 h-24 rounded-full bg-cyan-500/10 blur-2xl pointer-events-none group-hover:bg-cyan-500/20 group-hover:scale-110 transition-all duration-500" />
-                <div className="absolute bottom-0 left-0 right-0 h-[3px] bg-gradient-to-r from-cyan-600 via-cyan-500 to-cyan-600 shadow-[0_0_12px_#06b6d4] opacity-90" />
-                
-                <div className="space-y-2.5 min-w-0 w-full z-10 flex flex-col justify-between flex-1">
-                  <div className="flex justify-between items-start gap-3 w-full">
-                    <div className="min-w-0 flex-1 pt-1.5">
-                      <span className="text-[11px] font-bold text-zinc-400 uppercase tracking-widest block">Total Registries</span>
-                    </div>
-                    <div className="w-12 h-12 rounded-[16px] border border-cyan-500/30 flex items-center justify-center bg-[#0d1222]/80 shadow-[0_0_15px_rgba(6,182,212,0.15)] shrink-0 group-hover:scale-110 group-hover:rotate-3 group-hover:border-cyan-500/50 group-hover:shadow-[0_0_20px_rgba(6,182,212,0.3)] transition-all duration-300">
-                      <div className="w-8 h-8 rounded-full border border-cyan-500/60 flex items-center justify-center bg-transparent">
-                        <svg className="w-4.5 h-4.5 text-cyan-400 drop-shadow-[0_0_6px_rgba(6,182,212,0.4)]" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
-                          <path strokeLinecap="round" strokeLinejoin="round" d="M15.75 6a3.75 3.75 0 1 1-7.5 0 3.75 3.75 0 0 1 7.5 0ZM4.501 20.118a7.5 7.5 0 0 1 14.998 0A17.933 17.933 0 0 1 12 21.75c-2.676 0-5.216-.584-7.499-1.632Z" />
-                        </svg>
-                      </div>
-                    </div>
-                  </div>
-                  <div className="w-full">
-                    <span className="text-3xl font-extrabold text-cyan-400 block tracking-tight drop-shadow-[0_0_8px_rgba(6,182,212,0.2)] group-hover:text-cyan-300 group-hover:drop-shadow-[0_0_15px_rgba(6,182,212,0.5)] transition-all duration-300">{dbStats.totalUsers}</span>
-                  </div>
-                  <div className="text-[11px] text-zinc-400 font-semibold flex items-center gap-1 w-full">
-                    <span className="text-emerald-400">+12.4%</span>
-                    <span className="text-zinc-500 font-medium">from last cycle</span>
-                  </div>
-                </div>
-              </div>
-
-              {/* Card 2: Total Contributed */}
-              <div className="bg-gradient-to-br from-[#0e1325]/90 to-[#080c16]/95 border border-emerald-500/35 rounded-[24px] p-5 min-h-[140px] h-auto relative backdrop-blur-xl flex flex-col justify-between overflow-hidden group hover:border-emerald-400 hover:shadow-[0_0_30px_rgba(16,185,129,0.2)] transition-all duration-500 shadow-2xl">
-                <div className="absolute -top-12 -right-12 w-24 h-24 rounded-full bg-emerald-500/10 blur-2xl pointer-events-none group-hover:bg-emerald-500/20 group-hover:scale-110 transition-all duration-500" />
-                <div className="absolute bottom-0 left-0 right-0 h-[3px] bg-gradient-to-r from-emerald-600 via-emerald-500 to-emerald-600 shadow-[0_0_12px_#10b981] opacity-90" />
-                
-                <div className="space-y-2.5 min-w-0 w-full z-10 flex flex-col justify-between flex-1">
-                  <div className="flex justify-between items-start gap-3 w-full">
-                    <div className="min-w-0 flex-1 pt-1.5 relative group/tooltip">
-                      <span className="text-[11px] font-bold text-zinc-400 uppercase tracking-widest block cursor-help">Total Contributed</span>
-                      <div className="absolute bottom-full left-0 mb-2 w-max opacity-0 scale-95 pointer-events-none group-hover/tooltip:opacity-100 group-hover/tooltip:scale-100 transition-all duration-300 ease-out z-30">
-                        <div className="bg-[#0e1325]/95 backdrop-blur-md border border-emerald-500/30 px-3 py-1.5 rounded-xl shadow-[0_10px_30px_rgba(0,0,0,0.8),0_0_15px_rgba(16,185,129,0.1)] text-[10px] font-extrabold text-emerald-400 tracking-wider uppercase flex items-center gap-1.5">
-                          <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse"></span>
-                          Total Contributed
-                        </div>
-                        <div className="w-2 h-2 bg-[#0e1325] border-r border-b border-emerald-500/30 rotate-45 absolute top-full left-4 -translate-y-[5px]"></div>
-                      </div>
-                    </div>
-                    <div className="w-12 h-12 rounded-[16px] border border-emerald-500/30 flex items-center justify-center bg-[#0d1222]/80 shadow-[0_0_15px_rgba(16,185,129,0.15)] shrink-0 group-hover:scale-110 group-hover:rotate-3 group-hover:border-emerald-500/50 group-hover:shadow-[0_0_20px_rgba(16,185,129,0.3)] transition-all duration-300">
-                      <div className="w-8 h-8 rounded-full border border-emerald-500/60 flex items-center justify-center bg-transparent">
-                        <span className="text-emerald-400 font-black text-lg drop-shadow-[0_0_6px_rgba(16,185,129,0.5)]">$</span>
-                      </div>
-                    </div>
-                  </div>
-                  <div className="w-full">
-                    <span className="text-3xl font-extrabold text-emerald-400 block tracking-tight drop-shadow-[0_0_8px_rgba(16,185,129,0.2)] group-hover:text-emerald-300 group-hover:drop-shadow-[0_0_15px_rgba(16,185,129,0.5)] transition-all duration-300">₹{dbStats.totalDonationsSum.toLocaleString("en-IN")}</span>
-                  </div>
-                  <div className="text-[11px] text-zinc-400 font-semibold flex items-center gap-1 w-full">
-                    <span>Gross collection registry</span>
-                  </div>
-                </div>
-              </div>
-
-              {/* Card 3: Active Admins */}
-              <div className="bg-gradient-to-br from-[#0e1325]/90 to-[#080c16]/95 border border-purple-500/35 rounded-[24px] p-5 min-h-[140px] h-auto relative backdrop-blur-xl flex flex-col justify-between overflow-hidden group hover:border-purple-400 hover:shadow-[0_0_30px_rgba(139,92,246,0.2)] transition-all duration-500 shadow-2xl">
-                <div className="absolute -top-12 -right-12 w-24 h-24 rounded-full bg-purple-500/10 blur-2xl pointer-events-none group-hover:bg-purple-500/20 group-hover:scale-110 transition-all duration-500" />
-                <div className="absolute bottom-0 left-0 right-0 h-[3px] bg-gradient-to-r from-purple-600 via-purple-500 to-purple-600 shadow-[0_0_12px_#8b5cf6] opacity-90" />
-                
-                <div className="space-y-2.5 min-w-0 w-full z-10 flex flex-col justify-between flex-1">
-                  <div className="flex justify-between items-start gap-3 w-full">
-                    <div className="min-w-0 flex-1 pt-1.5">
-                      <span className="text-[11px] font-bold text-zinc-400 uppercase tracking-widest block">Active Admins</span>
-                    </div>
-                    <div className="w-12 h-12 rounded-[16px] border border-purple-500/30 flex items-center justify-center bg-[#0d1222]/80 shadow-[0_0_15px_rgba(139,92,246,0.15)] shrink-0 group-hover:scale-110 group-hover:rotate-3 group-hover:border-purple-500/50 group-hover:shadow-[0_0_20px_rgba(139,92,246,0.3)] transition-all duration-300">
-                      <div className="w-8 h-8 rounded-full border border-purple-500/60 flex items-center justify-center bg-transparent">
-                        <svg className="w-4.5 h-4.5 text-purple-400 drop-shadow-[0_0_6px_rgba(139,92,246,0.4)]" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
-                          <path strokeLinecap="round" strokeLinejoin="round" d="M15 19.128a9.38 9.38 0 0 0 2.625.372 9.337 9.337 0 0 0 4.121-.952 4.125 4.125 0 0 0-7.533-2.493M15 19.128v-.003c0-1.113-.285-2.16-.786-3.07M15 19.128v.109A11.386 11.386 0 0 1 10.089 21c-2.243 0-4.32-.647-6.079-1.758 1.935-1.921 4.673-3.113 7.68-3.113 1.956 0 3.791.493 5.4 1.361M15 8.75a3 3 0 1 1-6 0 3 3 0 0 1 6 0ZM19.5 12a2.25 2.25 0 1 1-4.5 0 2.25 2.25 0 0 1 4.5 0Z" />
-                        </svg>
-                      </div>
-                    </div>
-                  </div>
-                  <div className="w-full">
-                    <span className="text-3xl font-extrabold text-purple-400 block tracking-tight drop-shadow-[0_0_8px_rgba(139,92,246,0.2)] group-hover:text-purple-300 group-hover:drop-shadow-[0_0_15px_rgba(139,92,246,0.5)] transition-all duration-300">{dbStats.activeAdmins}</span>
-                  </div>
-                  <div className="text-[11px] text-zinc-400 font-semibold flex items-center gap-1 w-full">
-                    <span>Active moderation staff</span>
-                  </div>
-                </div>
-              </div>
-
-              {/* Card 4: Super Admins */}
-              <div className="bg-gradient-to-br from-[#0e1325]/90 to-[#080c16]/95 border border-amber-500/35 rounded-[24px] p-5 min-h-[140px] h-auto relative backdrop-blur-xl flex flex-col justify-between overflow-hidden group hover:border-amber-400 hover:shadow-[0_0_30px_rgba(245,158,11,0.2)] transition-all duration-500 shadow-2xl">
-                <div className="absolute -top-12 -right-12 w-24 h-24 rounded-full bg-amber-500/10 blur-2xl pointer-events-none group-hover:bg-amber-500/20 group-hover:scale-110 transition-all duration-500" />
-                <div className="absolute bottom-0 left-0 right-0 h-[3px] bg-gradient-to-r from-amber-600 via-amber-500 to-amber-600 shadow-[0_0_12px_#f59e0b] opacity-90" />
-                
-                <div className="space-y-2.5 min-w-0 w-full z-10 flex flex-col justify-between flex-1">
-                  <div className="flex justify-between items-start gap-3 w-full">
-                    <div className="min-w-0 flex-1 pt-1.5">
-                      <span className="text-[11px] font-bold text-zinc-400 uppercase tracking-widest block">Super Admins</span>
-                    </div>
-                    <div className="w-12 h-12 rounded-[16px] border border-amber-500/30 flex items-center justify-center bg-[#0d1222]/80 shadow-[0_0_15px_rgba(245,158,11,0.15)] shrink-0 group-hover:scale-110 group-hover:rotate-3 group-hover:border-amber-500/50 group-hover:shadow-[0_0_20px_rgba(245,158,11,0.3)] transition-all duration-300">
-                      <div className="w-8 h-8 rounded-full border border-amber-500/60 flex items-center justify-center bg-transparent">
-                        <svg className="w-4.5 h-4.5 text-amber-400 drop-shadow-[0_0_6px_rgba(245,158,11,0.4)]" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
-                          <path strokeLinecap="round" strokeLinejoin="round" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
-                        </svg>
-                      </div>
-                    </div>
-                  </div>
-                  <div className="w-full">
-                    <span className="text-3xl font-extrabold text-amber-500 block tracking-tight drop-shadow-[0_0_8px_rgba(245,158,11,0.2)] group-hover:text-amber-400 group-hover:drop-shadow-[0_0_15px_rgba(245,158,11,0.5)] transition-all duration-300">{dbStats.superAdmins}</span>
-                  </div>
-                  <div className="text-[11px] text-zinc-400 font-semibold flex items-center gap-1 w-full">
-                    <span>Full Access system operators</span>
-                  </div>
-                </div>
-              </div>
-            </>
-          ) : (
-            // Regular User stats cards
-            <>
-              {/* Card 1: My Total Contributions */}
-              <div className="bg-gradient-to-br from-[#0e1325]/90 to-[#080c16]/95 border border-amber-500/35 rounded-[24px] p-5 min-h-[140px] h-auto relative backdrop-blur-xl flex flex-col justify-between overflow-hidden group hover:border-amber-400 hover:shadow-[0_0_30px_rgba(245,158,11,0.2)] transition-all duration-500 shadow-2xl">
-                <div className="absolute -top-12 -right-12 w-24 h-24 rounded-full bg-amber-500/10 blur-2xl pointer-events-none group-hover:bg-amber-500/20 group-hover:scale-110 transition-all duration-500" />
-                <div className="absolute bottom-0 left-0 right-0 h-[3px] bg-gradient-to-r from-amber-600 via-amber-500 to-amber-600 shadow-[0_0_12px_#f59e0b] opacity-90" />
-                
-                <div className="space-y-2.5 min-w-0 w-full z-10 flex flex-col justify-between flex-1">
-                  <div className="flex justify-between items-start gap-3 w-full">
-                    <div className="min-w-0 flex-1 pt-1.5">
-                      <span className="text-[11px] font-bold text-zinc-400 uppercase tracking-widest block">My Total Contributions</span>
-                    </div>
-                    <div className="w-12 h-12 rounded-[16px] border border-amber-500/30 flex items-center justify-center bg-[#0d1222]/80 shadow-[0_0_15px_rgba(245,158,11,0.15)] shrink-0 group-hover:scale-110 group-hover:rotate-3 group-hover:border-amber-500/50 group-hover:shadow-[0_0_20px_rgba(245,158,11,0.3)] transition-all duration-300">
-                      <div className="w-8 h-8 rounded-full border border-amber-500/60 flex items-center justify-center bg-transparent">
-                        <span className="text-amber-400 font-black text-lg drop-shadow-[0_0_6px_rgba(245,158,11,0.5)]">$</span>
-                      </div>
-                    </div>
-                  </div>
-                  <div className="w-full">
-                    <span className="text-2xl font-extrabold text-amber-500 block tracking-tight drop-shadow-[0_0_8px_rgba(245,158,11,0.2)] group-hover:text-amber-400 group-hover:drop-shadow-[0_0_15px_rgba(245,158,11,0.5)] transition-all duration-300 font-sans font-extrabold">₹{dbStats.myTotalDonations.toLocaleString("en-IN")}</span>
-                  </div>
-                  <div className="text-[11px] text-zinc-400 font-semibold flex items-center gap-1 w-full">
-                    <span>Verified credits</span>
-                  </div>
-                </div>
-              </div>
-
-              {/* Card 2: Approved Receipts */}
-              <div className="bg-gradient-to-br from-[#0e1325]/90 to-[#080c16]/95 border border-emerald-500/35 rounded-[24px] p-5 min-h-[140px] h-auto relative backdrop-blur-xl flex flex-col justify-between overflow-hidden group hover:border-emerald-400 hover:shadow-[0_0_30px_rgba(16,185,129,0.2)] transition-all duration-500 shadow-2xl">
-                <div className="absolute -top-12 -right-12 w-24 h-24 rounded-full bg-emerald-500/10 blur-2xl pointer-events-none group-hover:bg-emerald-500/20 group-hover:scale-110 transition-all duration-500" />
-                <div className="absolute bottom-0 left-0 right-0 h-[3px] bg-gradient-to-r from-emerald-600 via-emerald-500 to-emerald-600 shadow-[0_0_12px_#10b981] opacity-90" />
-                
-                <div className="space-y-2.5 min-w-0 w-full z-10 flex flex-col justify-between flex-1">
-                  <div className="flex justify-between items-start gap-3 w-full">
-                    <div className="min-w-0 flex-1 pt-1.5">
-                      <span className="text-[11px] font-bold text-zinc-400 uppercase tracking-widest block">Approved Transactions</span>
-                    </div>
-                    <div className="w-12 h-12 rounded-[16px] border border-emerald-500/30 flex items-center justify-center bg-[#0d1222]/80 shadow-[0_0_15px_rgba(16,185,129,0.15)] shrink-0 group-hover:scale-110 group-hover:rotate-3 group-hover:border-emerald-500/50 group-hover:shadow-[0_0_20px_rgba(16,185,129,0.3)] transition-all duration-300">
-                      <div className="w-8 h-8 rounded-full border border-emerald-500/60 flex items-center justify-center bg-transparent">
-                        <svg className="w-4.5 h-4.5 text-emerald-400 drop-shadow-[0_0_6px_rgba(16,185,129,0.4)]" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
-                          <path strokeLinecap="round" strokeLinejoin="round" d="M9 12.75 11.25 15 15 9.75M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z" />
-                        </svg>
-                      </div>
-                    </div>
-                  </div>
-                  <div className="w-full">
-                    <span className="text-3xl font-extrabold text-emerald-400 block tracking-tight drop-shadow-[0_0_8px_rgba(16,185,129,0.2)] group-hover:text-emerald-300 group-hover:drop-shadow-[0_0_15px_rgba(16,185,129,0.5)] transition-all duration-300">{dbStats.myApprovedCount}</span>
-                  </div>
-                  <div className="text-[11px] text-zinc-400 font-semibold flex items-center gap-1 w-full">
-                    <span>Settled successfully</span>
-                  </div>
-                </div>
-              </div>
-
-              {/* Card 3: Pending verification */}
-              <div className="bg-gradient-to-br from-[#0e1325]/90 to-[#080c16]/95 border border-purple-500/35 rounded-[24px] p-5 min-h-[140px] h-auto relative backdrop-blur-xl flex flex-col justify-between overflow-hidden group hover:border-purple-400 hover:shadow-[0_0_30px_rgba(139,92,246,0.2)] transition-all duration-500 shadow-2xl">
-                <div className="absolute -top-12 -right-12 w-24 h-24 rounded-full bg-purple-500/10 blur-2xl pointer-events-none group-hover:bg-purple-500/20 group-hover:scale-110 transition-all duration-500" />
-                <div className="absolute bottom-0 left-0 right-0 h-[3px] bg-gradient-to-r from-purple-600 via-purple-500 to-purple-600 shadow-[0_0_12px_#8b5cf6] opacity-90" />
-                
-                <div className="space-y-2.5 min-w-0 w-full z-10 flex flex-col justify-between flex-1">
-                  <div className="flex justify-between items-start gap-3 w-full">
-                    <div className="min-w-0 flex-1 pt-1.5">
-                      <span className="text-[11px] font-bold text-zinc-400 uppercase tracking-widest block">Awaiting Verification</span>
-                    </div>
-                    <div className="w-12 h-12 rounded-[16px] border border-purple-500/30 flex items-center justify-center bg-[#0d1222]/80 shadow-[0_0_15px_rgba(139,92,246,0.15)] shrink-0 group-hover:scale-110 group-hover:rotate-3 group-hover:border-purple-500/50 group-hover:shadow-[0_0_20px_rgba(139,92,246,0.3)] transition-all duration-300">
-                      <div className="w-8 h-8 rounded-full border border-purple-500/60 flex items-center justify-center bg-transparent">
-                        <svg className="w-4.5 h-4.5 text-purple-400 drop-shadow-[0_0_6px_rgba(139,92,246,0.4)]" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
-                          <path strokeLinecap="round" strokeLinejoin="round" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
-                        </svg>
-                      </div>
-                    </div>
-                  </div>
-                  <div className="w-full">
-                    <span className="text-3xl font-extrabold text-amber-500 block tracking-tight drop-shadow-[0_0_8px_rgba(245,158,11,0.2)] group-hover:text-amber-400 group-hover:drop-shadow-[0_0_15px_rgba(245,158,11,0.5)] transition-all duration-300">{dbStats.myPendingCount} claims</span>
-                  </div>
-                  <div className="text-[11px] text-zinc-400 font-semibold flex items-center gap-1 w-full">
-                    <span className="text-amber-500">Under review by admins</span>
-                  </div>
-                </div>
-              </div>
-
-              {/* Card 4: Registry Tier */}
-              <div className="bg-gradient-to-br from-[#0e1325]/90 to-[#080c16]/95 border border-cyan-500/35 rounded-[24px] p-5 min-h-[140px] h-auto relative backdrop-blur-xl flex flex-col justify-between overflow-hidden group hover:border-cyan-400 hover:shadow-[0_0_30px_rgba(6,182,212,0.2)] transition-all duration-500 shadow-2xl">
-                <div className="absolute -top-12 -right-12 w-24 h-24 rounded-full bg-cyan-500/10 blur-2xl pointer-events-none group-hover:bg-cyan-500/20 group-hover:scale-110 transition-all duration-500" />
-                <div className="absolute bottom-0 left-0 right-0 h-[3px] bg-gradient-to-r from-cyan-600 via-cyan-500 to-cyan-600 shadow-[0_0_12px_#06b6d4] opacity-90" />
-                
-                <div className="space-y-2.5 min-w-0 w-full z-10 flex flex-col justify-between flex-1">
-                  <div className="flex justify-between items-start gap-3 w-full">
-                    <div className="min-w-0 flex-1 pt-1.5">
-                      <span className="text-[11px] font-bold text-zinc-400 uppercase tracking-widest block">Registry Tier</span>
-                    </div>
-                    <div className="w-12 h-12 rounded-[16px] border border-cyan-500/30 flex items-center justify-center bg-[#0d1222]/80 shadow-[0_0_15px_rgba(6,182,212,0.15)] shrink-0 group-hover:scale-110 group-hover:rotate-3 group-hover:border-cyan-500/50 group-hover:shadow-[0_0_20px_rgba(6,182,212,0.3)] transition-all duration-300">
-                      <div className="w-8 h-8 rounded-full border border-cyan-500/60 flex items-center justify-center bg-transparent">
-                        <svg className="w-4.5 h-4.5 text-cyan-400 drop-shadow-[0_0_6px_rgba(6,182,212,0.4)]" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
-                          <path strokeLinecap="round" strokeLinejoin="round" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
-                        </svg>
-                      </div>
-                    </div>
-                  </div>
-                  <div className="w-full">
-                    <span className="text-2xl font-extrabold text-blue-400 block tracking-tight drop-shadow-[0_0_8px_rgba(6,182,212,0.2)] group-hover:text-blue-300 group-hover:drop-shadow-[0_0_15px_rgba(6,182,212,0.5)] transition-all duration-300">{currentUser.role.replace("_", " ")}</span>
-                  </div>
-                  <div className="text-[11px] text-zinc-400 font-semibold flex items-center gap-1.5 w-full">
-                    <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
-                    <span>Status: Active</span>
-                  </div>
-                </div>
-              </div>
-            </>
-          )}
+        {/* REDESIGNED METRIC CARDS ROW: 5 Columns Grid exactly like screenshot */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4 lg:gap-5">
+          {metrics.map((m, idx) => (
+            <div
+              key={idx}
+              className="bg-[#111928]/40 border border-zinc-800/40 rounded-2xl p-5 shadow-[0_4px_12px_rgba(0,0,0,0.02)] hover:shadow-md transition-shadow duration-300 flex flex-col justify-center gap-1.5 min-h-[90px]"
+            >
+              <span className="text-xs text-zinc-450 font-semibold tracking-wide">
+                {m.label}
+              </span>
+              <span
+                className={`text-2xl font-extrabold tracking-tight ${
+                  m.isRed ? "text-red-500" : "text-zinc-100"
+                }`}
+              >
+                {m.value}
+              </span>
+            </div>
+          ))}
         </div>
 
-        {/* Charts and Details Section */}
-        <div className="grid grid-cols-1 xl:grid-cols-2 gap-6 flex-1 min-h-[380px]">
+        {/* REDESIGNED CHARTS ROW: Daily Sales (Bar) & Monthly Sales (Line) Side-by-side */}
+        <div className="grid grid-cols-1 xl:grid-cols-2 gap-6 flex-1">
           
-          {/* Chart 1: Contribution overview */}
-          <div className="bg-[#0e1325]/55 border border-zinc-800/40 rounded-[24px] p-6 flex flex-col justify-between hover:border-zinc-700/50 transition-all duration-300 backdrop-blur-md shadow-lg relative overflow-hidden">
-            <div className="mb-4">
-              <h3 className="text-base font-bold text-white">
-                {isAdmin ? "Monthly Donations Overview" : "My Contributions Timeline"}
-              </h3>
-              <p className="text-xs text-zinc-500 mt-0.5">
-                {isAdmin ? "Line breakdown of verified credits." : "Line graph mapping your payment points."}
-              </p>
+          {/* Daily Sales Bar Chart Card (Left) */}
+          <div className="bg-[#111928]/40 border border-zinc-800/40 rounded-3xl p-6 shadow-[0_4px_16px_rgba(0,0,0,0.02)] flex flex-col justify-between min-h-[360px]">
+            <div>
+              <h3 className="text-base font-bold text-white tracking-wide">Daily Sales</h3>
+              <p className="text-xs text-zinc-505 mt-0.5">Mock overview of registry volume.</p>
             </div>
 
-            <div className="flex-1 w-full relative h-[200px] flex items-center justify-center">
-              <div className="absolute inset-0 flex flex-col justify-between py-[20px] px-[40px] pointer-events-none opacity-[0.05]">
-                <div className="border-b border-white w-full h-px"></div>
-                <div className="border-b border-white w-full h-px"></div>
-                <div className="border-b border-white w-full h-px"></div>
-              </div>
+            {/* SVG Bar Chart representing user's screenshot layout */}
+            <div className="flex-1 w-full relative h-[220px] flex items-center justify-center pt-4">
+              <svg viewBox="0 0 440 240" className="w-full h-full overflow-visible">
+                {/* Horizontal dotted gridlines */}
+                {[0, 60, 120, 180, 240].map((val, idx) => {
+                  const y = 200 - (val / 240) * 160;
+                  return (
+                    <g key={idx}>
+                      <line
+                        x1="35"
+                        y1={y}
+                        x2="420"
+                        y2={y}
+                        stroke="rgba(226, 232, 240, 0.08)"
+                        strokeDasharray="3"
+                        className="dashboard-light-theme:stroke-slate-200"
+                        style={{ stroke: "var(--light-card-border)" }}
+                      />
+                      <text
+                        x="10"
+                        y={y + 4}
+                        fill="#64748b"
+                        className="text-[10px] font-mono text-zinc-500"
+                        textAnchor="start"
+                      >
+                        {val}
+                      </text>
+                    </g>
+                  );
+                })}
 
-              <svg viewBox="0 0 600 220" className="w-full h-full overflow-visible z-10">
-                <defs>
-                  <linearGradient id="dbGradient" x1="0" y1="0" x2="0" y2="1">
-                    <stop offset="0%" stopColor="var(--primary-accent)" stopOpacity="0.3" />
-                    <stop offset="100%" stopColor="var(--primary-accent)" stopOpacity="0.0" />
-                  </linearGradient>
-                  <filter id="glow" x="-20%" y="-20%" width="140%" height="140%">
-                    <feGaussianBlur stdDeviation="6" result="blur" />
-                    <feComposite in="SourceGraphic" in2="blur" operator="over" />
-                  </filter>
-                </defs>
-
-                <path d={areaPath} fill="url(#dbGradient)" />
-                {/* Glowing glow line */}
-                <path d={linePath} fill="none" stroke="var(--primary-accent)" strokeWidth="8" opacity="0.35" filter="url(#glow)" />
-                {/* Crisp main line */}
-                <path d={linePath} fill="none" stroke="var(--primary-accent)" strokeWidth="3.5" />
-
-                {chartCoords.map((c, i) => (
-                  <g key={i}>
-                    <circle
-                      cx={c.x}
-                      cy={c.y}
-                      r={hoveredChart1 === i ? "10" : "0"}
-                      fill="var(--primary-accent)"
-                      opacity="0.25"
-                      className="transition-all duration-200"
-                    />
-                    <circle
-                      cx={c.x}
-                      cy={c.y}
-                      r={hoveredChart1 === i ? "6.5" : "4.5"}
-                      fill="#ffffff"
-                      stroke="var(--primary-accent)"
-                      strokeWidth="3"
-                      className="cursor-pointer transition-all duration-200"
-                      onMouseEnter={() => setHoveredChart1(i)}
-                      onMouseLeave={() => setHoveredChart1(null)}
-                    />
-                  </g>
-                ))}
+                {/* Bars - Purple/Indigo like screenshot Daily Sales */}
+                {[
+                  { x: 55, h: 110, val: 110, day: "Mon" },
+                  { x: 105, h: 130, val: 130, day: "Tue" },
+                  { x: 155, h: 90, val: 90, day: "Wed" },
+                  { x: 205, h: 130, val: 130, day: "Thu" },
+                  { x: 255, h: 190, val: 190, day: "Fri" },
+                  { x: 305, h: 235, val: 235, day: "Sat" },
+                  { x: 355, h: 215, val: 215, day: "Sun" },
+                ].map((bar, idx) => {
+                  const y = 200 - bar.h;
+                  const isHovered = hoveredChart2 === idx;
+                  return (
+                    <g
+                      key={idx}
+                      onMouseEnter={() => setHoveredChart2(idx)}
+                      onMouseLeave={() => setHoveredChart2(null)}
+                      className="cursor-pointer"
+                    >
+                      <rect
+                        x={bar.x}
+                        y={y}
+                        width="24"
+                        height={bar.h}
+                        rx="5"
+                        fill={isHovered ? "#4f46e5" : "#6366f1"}
+                        className="transition-all duration-300 origin-bottom"
+                      />
+                      {/* X Axis Labels under each bar */}
+                      <text
+                        x={bar.x + 12}
+                        y="225"
+                        fill="#64748b"
+                        className="text-[10px] font-mono text-zinc-500 font-semibold"
+                        textAnchor="middle"
+                      >
+                        {bar.day}
+                      </text>
+                    </g>
+                  );
+                })}
               </svg>
-
-              {hoveredChart1 !== null && chartCoords[hoveredChart1] && (
+              
+              {/* Tooltip */}
+              {hoveredChart2 !== null && (
                 <div
-                  className="absolute z-20 bg-zinc-950 border border-zinc-800 p-2.5 rounded-xl shadow-2xl backdrop-blur text-xs pointer-events-none"
+                  className="absolute z-20 bg-zinc-950 text-white border border-zinc-800 px-3 py-1.5 rounded-xl shadow-2xl text-[10px] font-mono pointer-events-none"
                   style={{
-                    left: `${(chartCoords[hoveredChart1].x / 600) * 100}%`,
-                    top: `${(chartCoords[hoveredChart1].y / 220) * 100 - 10}%`,
-                    transform: "translateX(-50%) translateY(-100%)",
+                    left: `${55 + hoveredChart2 * 50 + 12}px`,
+                    top: `${200 - [110, 130, 90, 130, 190, 235, 215][hoveredChart2] - 30}px`,
+                    transform: "translateX(-50%)",
                   }}
                 >
-                  <div className="font-extrabold text-white">
-                    {isAdmin 
-                      ? `₹${(chartCoords[hoveredChart1].val * 1000).toLocaleString("en-IN")}` 
-                      : `₹${(chartCoords[hoveredChart1].val * 500).toLocaleString("en-IN")}`}
-                  </div>
-                  <div className="text-[9px] text-zinc-500 uppercase mt-0.5">{chartCoords[hoveredChart1].label}</div>
+                  {[110, 130, 90, 130, 190, 235, 215][hoveredChart2]} Claims
                 </div>
               )}
             </div>
+          </div>
 
-            <div className="flex justify-between px-[45px] pt-4 border-t border-zinc-800/40 text-[9px] font-mono text-zinc-500 uppercase tracking-widest">
-              {chartPoints.map((p, i) => (
-                <span key={i}>{p.label}</span>
-              ))}
+          {/* Monthly Sales Curved Line Chart Card (Right) */}
+          <div className="bg-[#111928]/40 border border-zinc-800/40 rounded-3xl p-6 shadow-[0_4px_16px_rgba(0,0,0,0.02)] flex flex-col justify-between min-h-[360px]">
+            <div>
+              <h3 className="text-base font-bold text-white tracking-wide">Monthly Sales</h3>
+              <p className="text-xs text-zinc-505 mt-0.5">Overview of verified registry collections.</p>
+            </div>
+
+            {/* SVG Line Chart representing user's screenshot layout */}
+            <div className="flex-1 w-full relative h-[220px] flex items-center justify-center pt-4">
+              <svg viewBox="0 0 440 240" className="w-full h-full overflow-visible">
+                <defs>
+                  <linearGradient id="cyanGradient" x1="0" y1="0" x2="0" y2="1">
+                    <stop offset="0%" stopColor="#06b6d4" stopOpacity="0.25" />
+                    <stop offset="100%" stopColor="#06b6d4" stopOpacity="0.0" />
+                  </linearGradient>
+                </defs>
+
+                {/* Horizontal dotted gridlines */}
+                {[0, 2000, 4000, 6000, 8000].map((val, idx) => {
+                  const y = 200 - (val / 8000) * 160;
+                  return (
+                    <g key={idx}>
+                      <line
+                        x1="35"
+                        y1={y}
+                        x2="420"
+                        y2={y}
+                        stroke="rgba(226, 232, 240, 0.08)"
+                        strokeDasharray="3"
+                        className="dashboard-light-theme:stroke-slate-200"
+                        style={{ stroke: "var(--light-card-border)" }}
+                      />
+                      <text
+                        x="10"
+                        y={y + 4}
+                        fill="#64748b"
+                        className="text-[10px] font-mono text-zinc-500"
+                        textAnchor="start"
+                      >
+                        {val}
+                      </text>
+                    </g>
+                  );
+                })}
+
+                {/* Gradient area underneath curved path */}
+                <path
+                  d="M 50 120 C 90 155, 120 90, 170 100 C 220 110, 250 70, 300 76 C 350 80, 400 60, 420 70 L 420 200 L 50 200 Z"
+                  fill="url(#cyanGradient)"
+                />
+
+                {/* Smooth cyan curved line path */}
+                <path
+                  d="M 50 120 C 90 155, 120 90, 170 100 C 220 110, 250 70, 300 76 C 350 80, 400 60, 420 70"
+                  fill="none"
+                  stroke="#06b6d4"
+                  strokeWidth="3.5"
+                />
+
+                {/* Tooltip anchors / Circles / X Axis Labels */}
+                {[
+                  { x: 50, y: 120, val: 4000, month: "Jan" },
+                  { x: 110, y: 138, val: 3100, month: "Feb" },
+                  { x: 170, y: 100, val: 5000, month: "Mar" },
+                  { x: 236, y: 106, val: 4700, month: "Apr" },
+                  { x: 300, y: 76, val: 6200, month: "May" },
+                  { x: 364, y: 64, val: 6800, month: "Jun" },
+                  { x: 420, y: 70, val: 6500, month: "Jul" },
+                ].map((pt, idx) => {
+                  const isHovered = hoveredChart1 === idx;
+                  return (
+                    <g key={idx}>
+                      <circle
+                        cx={pt.x}
+                        cy={pt.y}
+                        r={isHovered ? 8 : 4.5}
+                        fill={isHovered ? "#22d3ee" : "#ffffff"}
+                        stroke="#06b6d4"
+                        strokeWidth="2.5"
+                        onMouseEnter={() => setHoveredChart1(idx)}
+                        onMouseLeave={() => setHoveredChart1(null)}
+                        className="cursor-pointer transition-all duration-200"
+                      />
+                      {/* X Axis Labels under each line coordinate */}
+                      <text
+                        x={pt.x}
+                        y="225"
+                        fill="#64748b"
+                        className="text-[10px] font-mono text-zinc-500 font-semibold"
+                        textAnchor="middle"
+                      >
+                        {pt.month}
+                      </text>
+                    </g>
+                  );
+                })}
+              </svg>
+              
+              {/* Line chart Tooltip */}
+              {hoveredChart1 !== null && (
+                <div
+                  className="absolute z-20 bg-zinc-950 text-white border border-zinc-800 px-3 py-1.5 rounded-xl shadow-2xl text-[10px] font-mono pointer-events-none"
+                  style={{
+                    left: `${[50, 110, 170, 236, 300, 364, 420][hoveredChart1] + 12}px`,
+                    top: `${[120, 138, 100, 106, 76, 64, 70][hoveredChart1] - 30}px`,
+                    transform: "translateX(-50%)",
+                  }}
+                >
+                  ₹{[4000, 3100, 5000, 4700, 6200, 6800, 6500][hoveredChart1].toLocaleString("en-IN")}
+                </div>
+              )}
             </div>
           </div>
 
-          {/* Right Panel: Admin weekly summaries OR User personal recent timeline */}
-          {isAdmin ? (
-            /* Admin: Weekly Registries Chart */
-            <div className="bg-[#0e1325]/55 border border-zinc-800/40 rounded-[24px] p-6 flex flex-col justify-between hover:border-zinc-700/50 transition-all duration-300 backdrop-blur-md shadow-lg relative overflow-hidden">
-              <div className="mb-4">
-                <h3 className="text-base font-bold text-white">New Registries Summary</h3>
-                <p className="text-xs text-zinc-500 mt-0.5">Weekly volume of newly approved profiles.</p>
-              </div>
-
-              <div className="flex-1 w-full relative h-[200px] flex items-end justify-between px-6 py-2">
-                <div className="absolute inset-0 flex flex-col justify-between py-6 px-4 pointer-events-none opacity-[0.05]">
-                  <div className="border-b border-white w-full h-px"></div>
-                  <div className="border-b border-white w-full h-px"></div>
-                  <div className="border-b border-white w-full h-px"></div>
-                </div>
-
-                {chart2Points.map((val, idx) => {
-                  const maxChart2 = Math.max(...chart2Points.map((p) => p.val));
-                  const barHeight = (val.val / maxChart2) * 80;
-
-                  return (
-                    <div key={idx} className="flex-1 flex flex-col items-center gap-3 h-full justify-end group z-10">
-                      <div className="w-12 flex-1 bg-zinc-800/10 rounded-2xl relative overflow-hidden flex items-end border border-zinc-800/15">
-                        <div
-                          style={{ height: `${barHeight}%`, backgroundColor: "var(--primary-accent)" }}
-                          className="w-full rounded-t-xl transition-all duration-500 relative shadow-[0_-4px_12px_rgba(255,255,255,0.05)] cursor-pointer opacity-80 group-hover:opacity-100 group-hover:scale-y-[1.02] origin-bottom"
-                          onMouseEnter={() => setHoveredChart2(idx)}
-                          onMouseLeave={() => setHoveredChart2(null)}
-                        >
-                          {hoveredChart2 === idx && (
-                            <span className="absolute -top-10 left-1/2 -translate-x-1/2 bg-zinc-950 text-[10px] text-white px-2.5 py-1 rounded-lg border border-zinc-800 whitespace-nowrap font-mono shadow-2xl z-20">
-                              {val.val} Users
-                            </span>
-                          )}
-                        </div>
-                      </div>
-                      <span className="text-[10px] text-zinc-500 font-mono uppercase tracking-wider">
-                        {val.label}
-                      </span>
-                    </div>
-                  );
-                })}
-              </div>
-            </div>
-          ) : (
-            /* User: Recent claims timeline + Payment Guides */
-            <div className="bg-[#0e1325]/55 border border-zinc-800/40 rounded-[24px] p-6 flex flex-col justify-between hover:border-zinc-700/50 transition-all duration-300 backdrop-blur-md shadow-lg relative overflow-hidden">
-              <div className="mb-4 flex justify-between items-start">
-                <div>
-                  <h3 className="text-base font-bold text-white">My Payment Claims</h3>
-                  <p className="text-xs text-zinc-500 mt-0.5">Timeline status of recent transactions.</p>
-                </div>
-                <a
-                  href="/dashboard/pending-donations"
-                  style={{ color: "var(--primary-accent)" }}
-                  className="text-xs font-bold hover:underline cursor-pointer"
-                >
-                  Submit New Claim
-                </a>
-              </div>
-
-              <div className="flex-1 space-y-4 my-2 overflow-y-auto no-scrollbar max-h-[220px]">
-                {myRecentClaims.length > 0 ? (
-                  myRecentClaims.map((claim) => (
-                    <div key={claim.id} className="flex justify-between items-center bg-[#0d1222]/30 hover:bg-[#0d1222]/55 border border-zinc-800/40 p-4 rounded-2xl transition-all duration-200 hover:border-zinc-700/50 group">
-                      <div className="space-y-1">
-                        <span className="text-xs font-bold text-white block group-hover:text-zinc-100 transition-colors">{claim.campaign}</span>
-                        <div className="text-[10px] font-mono text-zinc-500 flex gap-2">
-                          <span>{claim.date}</span>
-                          <span>•</span>
-                          <span>Ref: {claim.refNo}</span>
-                        </div>
-                      </div>
-                      
-                      <div className="text-right flex items-center gap-3">
-                        <span className="text-sm font-bold font-mono text-white">₹{claim.amount.toLocaleString("en-IN")}</span>
-                        <span className={`text-[9px] font-extrabold px-2 py-0.5 rounded-full border shadow-sm ${claim.color}`}>
-                          {claim.status}
-                        </span>
-                      </div>
-                    </div>
-                  ))
-                ) : (
-                  <div className="py-12 text-center text-xs text-zinc-500 flex flex-col items-center justify-center gap-2 border border-dashed border-zinc-800 rounded-2xl bg-zinc-950/20">
-                    <svg className="w-7 h-7 text-zinc-700" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
-                    </svg>
-                    <span>No donation claims registered. Click top-right to log your first payment.</span>
-                  </div>
-                )}
-              </div>
-            </div>
-          )}
-
         </div>
 
+        {/* WhatsApp Banner preservation */}
         {!isAdmin && !currentUser?.whatsappJoined && (
-          <div className="bg-gradient-to-br from-[#0c1a16] via-[#040f0c] to-[#0c1a16] border border-emerald-500/25 rounded-[24px] p-6 md:p-8 hover:border-emerald-400/40 hover:shadow-[0_0_40px_rgba(16,185,129,0.12)] transition-all duration-500 relative overflow-hidden backdrop-blur-md shadow-2xl flex flex-col md:flex-row md:items-center justify-between gap-6">
+          <div className="bg-gradient-to-br from-[#0c1a16] via-[#040f0c] to-[#0c1a16] border border-emerald-500/25 rounded-[24px] p-6 hover:border-emerald-400/40 hover:shadow-[0_0_40px_rgba(16,185,129,0.12)] transition-all duration-500 relative overflow-hidden backdrop-blur-md shadow-2xl flex flex-col md:flex-row md:items-center justify-between gap-6 mt-6">
             <div className="absolute top-[-20%] right-[-10%] w-48 h-48 rounded-full bg-emerald-500/10 blur-3xl pointer-events-none"></div>
             <div className="absolute bottom-[-20%] left-[-10%] w-48 h-48 rounded-full bg-emerald-500/5 blur-3xl pointer-events-none"></div>
             
@@ -588,9 +370,9 @@ export default function DashboardContent() {
                 <span className="w-2.5 h-2.5 rounded-full bg-emerald-400 animate-pulse shadow-[0_0_8px_rgba(52,211,153,0.8)]"></span>
                 <span className="text-[11px] font-extrabold text-emerald-400 uppercase tracking-widest block">Official Community Group</span>
               </div>
-              <h3 className="text-xl md:text-2xl font-black text-white tracking-tight">Join Our WhatsApp Community</h3>
+              <h3 className="text-xl font-black text-white tracking-tight">Join Our WhatsApp Community</h3>
               <p className="text-zinc-400 text-xs md:text-sm leading-relaxed max-w-3xl">
-                Get real-time updates regarding food distribution drives, education funds allocation, and emergency medical appeals. Connect directly with administrators and fellow contributors.
+                Get real-time updates regarding food distribution drives, education funds allocation, and emergency appeals. Connect directly with administrators.
               </p>
             </div>
             

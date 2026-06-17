@@ -47,7 +47,7 @@ export default function DonationLoader({ message = "Validating session..." }) {
   }, []);
 
   return (
-    <div className="fixed inset-0 bg-[#060814] text-zinc-100 flex flex-col items-center justify-center font-sans z-[9999] overflow-hidden select-none">
+    <div className="dashboard-light-theme fixed inset-0 bg-[#060814] text-zinc-100 flex flex-col items-center justify-center font-sans z-[9999] overflow-hidden select-none">
       {/* Advanced CSS Animations */}
       <style>{`
         @keyframes bgGlow {

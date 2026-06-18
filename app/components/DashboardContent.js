@@ -91,18 +91,18 @@ export default function DashboardContent() {
   // Data mapping for 5 cards based on User Role (using Title Case to match screenshot)
   const metrics = isAdmin
     ? [
-        { label: "Total Contributors", value: dbStats.totalUsers.toLocaleString("en-IN"), isRed: false },
-        { label: "Approved Claims", value: dbStats.totalApproved.toLocaleString("en-IN"), isRed: false },
-        { label: "Moderators List", value: `${dbStats.activeAdmins} Admins`, isRed: false },
-        { label: "Monthly Collections", value: `₹${dbStats.totalDonationsSum.toLocaleString("en-IN")}`, isRed: false },
-        { label: "Pending Claims Sum", value: `₹${totalPendingAmount.toLocaleString("en-IN")}`, isRed: true },
+        { label: "Total Contributors", value: dbStats.totalUsers.toLocaleString("en-IN"), colorClass: "bg-blue-500", isRed: false },
+        { label: "Approved Claims", value: dbStats.totalApproved.toLocaleString("en-IN"), colorClass: "bg-emerald-500", isRed: false },
+        { label: "Moderators List", value: `${dbStats.activeAdmins} Admins`, colorClass: "bg-purple-500", isRed: false },
+        { label: "Monthly Collections", value: `₹${dbStats.totalDonationsSum.toLocaleString("en-IN")}`, colorClass: "bg-cyan-500", isRed: false },
+        { label: "Pending Claims Sum", value: `₹${totalPendingAmount.toLocaleString("en-IN")}`, colorClass: "bg-red-500", isRed: true },
       ]
     : [
-        { label: "Total Claims", value: (dbStats.myApprovedCount + dbStats.myPendingCount).toString(), isRed: false },
-        { label: "Approved Claims", value: dbStats.myApprovedCount.toString(), isRed: false },
-        { label: "Registry Tier", value: "Contributor", isRed: false },
-        { label: "My Contributed Sum", value: `₹${dbStats.myTotalDonations.toLocaleString("en-IN")}`, isRed: false },
-        { label: "Awaiting Verification", value: `₹${dbStats.myPendingSum.toLocaleString("en-IN")}`, isRed: true },
+        { label: "Total Claims", value: (dbStats.myApprovedCount + dbStats.myPendingCount).toString(), colorClass: "bg-blue-500", isRed: false },
+        { label: "Approved Claims", value: dbStats.myApprovedCount.toString(), colorClass: "bg-emerald-500", isRed: false },
+        { label: "Registry Tier", value: "Contributor", colorClass: "bg-purple-500", isRed: false },
+        { label: "My Contributed Sum", value: `₹${dbStats.myTotalDonations.toLocaleString("en-IN")}`, colorClass: "bg-cyan-500", isRed: false },
+        { label: "Awaiting Verification", value: `₹${dbStats.myPendingSum.toLocaleString("en-IN")}`, colorClass: "bg-red-500", isRed: true },
       ];
 
   return (
@@ -123,17 +123,20 @@ export default function DashboardContent() {
       <main className="space-y-8 flex-1 flex flex-col justify-between">
         
         {/* REDESIGNED METRIC CARDS ROW: 5 Columns Grid exactly like screenshot */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4 lg:gap-5">
+        <div className="grid grid-cols-2 md:grid-cols-5 gap-3.5 md:gap-4 lg:gap-5">
           {metrics.map((m, idx) => (
             <div
               key={idx}
-              className="bg-[#111928]/40 border border-zinc-800/40 rounded-2xl p-5 shadow-[0_4px_12px_rgba(0,0,0,0.02)] hover:shadow-md transition-shadow duration-300 flex flex-col justify-center gap-1.5 min-h-[90px]"
+              className="bg-[#111928]/40 border border-zinc-800/40 rounded-xl p-4 sm:p-5 shadow-sm hover:shadow-md transition-all duration-300 flex flex-col justify-center gap-1.5 min-h-[90px] last:col-span-2 md:last:col-span-1"
             >
-              <span className="text-xs text-zinc-450 font-semibold tracking-wide">
-                {m.label}
-              </span>
+              <div className="flex items-center gap-2">
+                <span className={`w-2 h-2 rounded-full shrink-0 ${m.colorClass}`}></span>
+                <span className="text-[10px] sm:text-xs text-zinc-400 font-semibold tracking-wider uppercase truncate">
+                  {m.label}
+                </span>
+              </div>
               <span
-                className={`text-2xl font-extrabold tracking-tight ${
+                className={`text-xl sm:text-2xl font-bold tracking-tight ${
                   m.isRed ? "text-red-500" : "text-zinc-100"
                 }`}
               >

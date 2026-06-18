@@ -2,6 +2,7 @@
 
 import React, { useState, useEffect } from "react";
 import { getUsers, saveUsers, getCurrentUser, addAuditLog } from "../utils/db";
+import Link from "next/link";
 
 export default function UsersListView() {
   const [currentUser, setCurrentUser] = useState(null);
@@ -21,8 +22,7 @@ export default function UsersListView() {
   const [newUserName, setNewUserName] = useState("");
   const [newUserMobile, setNewUserMobile] = useState("");
   const [newUserRole, setNewUserRole] = useState("USER");
-  const [newWhatsappGroup, setNewWhatsappGroup] = useState("");
-  const [newAlreadyJoined, setNewAlreadyJoined] = useState(false);
+  const [newUserPassword, setNewUserPassword] = useState("");
 
   // Form states for editing user
   const [editUserName, setEditUserName] = useState("");
@@ -76,12 +76,12 @@ export default function UsersListView() {
           <p className="text-zinc-400 text-xs leading-relaxed">
             Your account tier (Regular Contributor) does not possess permission to inspect the user registrations database.
           </p>
-          <a
+          <Link
             href="/dashboard"
             className="inline-block px-5 py-2.5 bg-zinc-800 hover:bg-zinc-700 text-white font-bold rounded-xl transition-all cursor-pointer text-xs"
           >
             Back to Dashboard
-          </a>
+          </Link>
         </div>
       </div>
     );
@@ -153,6 +153,10 @@ export default function UsersListView() {
       addToast("Please enter a valid 10-digit mobile number.", "error");
       return;
     }
+    if (!newUserPassword) {
+      addToast("Please enter a password.", "error");
+      return;
+    }
 
     // Admins cannot create ADMIN or SUPER_ADMIN
     if (!isSuperAdmin && newUserRole !== "USER") {
@@ -173,15 +177,15 @@ export default function UsersListView() {
       id: Date.now(),
       name: newUserName,
       mobile: newUserMobile,
-      password: "123456", // Default password
+      password: newUserPassword,
       role: newUserRole,
       status: "Active",
       joined: new Date().toISOString().split("T")[0],
       donations: 0,
       color: randomGradient,
       addedBy: currentUser.name || "System",
-      whatsappGroup: newWhatsappGroup || "https://chat.whatsapp.com/G2EHonNxcjoBwtygpTmCg4",
-      whatsappJoined: newAlreadyJoined,
+      whatsappGroup: "https://chat.whatsapp.com/G2EHonNxcjoBwtygpTmCg4",
+      whatsappJoined: false,
     };
 
     const updated = [newUserObj, ...users];
@@ -191,8 +195,7 @@ export default function UsersListView() {
     addToast(`User ${newUserName} added successfully!`, "success");
 
     setNewUserRole("USER");
-    setNewWhatsappGroup("");
-    setNewAlreadyJoined(false);
+    setNewUserPassword("");
     setIsAddUserOpen(false);
   };
 
@@ -797,99 +800,119 @@ export default function UsersListView() {
 
       {/* MODAL 3: QUICK ADD USER OVERLAY */}
       {isAddUserOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-end bg-zinc-950/80 backdrop-blur-md animate-[fadeIn_0.2s_ease-out]">
-          <div className="h-full bg-[#111928] border-l border-zinc-800 max-w-md w-full p-8 shadow-2xl flex flex-col justify-between animate-slide-in-right">
-            <div>
-              <div className="flex justify-between items-center mb-8">
-                <h3 className="text-xl font-bold text-white flex items-center gap-2">
-                  <span className="w-1.5 h-6 bg-primary-accent rounded-full"></span>
-                  Quick Register Entry
-                </h3>
-                <button onClick={() => setIsAddUserOpen(false)} className="text-zinc-500 hover:text-white cursor-pointer">
-                  <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}><path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" /></svg>
-                </button>
-              </div>
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-zinc-950/80 backdrop-blur-md animate-[fadeIn_0.2s_ease-out]">
+          <div className="bg-[#111928] border border-zinc-800 rounded-3xl p-6 md:p-8 max-w-xl w-full relative shadow-2xl space-y-6">
+            
+            {/* Header */}
+            <div className="flex justify-between items-center pb-4 border-b border-zinc-800/60">
+              <h3 className="text-xl font-bold text-white tracking-tight">
+                Add New User
+              </h3>
+              <button 
+                onClick={() => setIsAddUserOpen(false)} 
+                className="p-1 rounded-lg text-zinc-500 hover:text-white hover:bg-white/5 transition-colors cursor-pointer"
+                aria-label="Close"
+              >
+                <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
+                </svg>
+              </button>
+            </div>
 
-              <form onSubmit={handleAddNewUser} className="space-y-6">
-                <div className="space-y-2">
-                  <label className="text-xs font-bold text-zinc-400 uppercase tracking-wider">Full Name</label>
+            <form onSubmit={handleAddNewUser} className="space-y-5">
+              {/* Row 1: Full Name & Mobile Number */}
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div className="space-y-1.5">
+                  <label className="text-xs font-bold text-zinc-300">
+                    Full Name <span className="text-red-500">*</span>
+                  </label>
                   <input
                     type="text"
                     required
                     value={newUserName}
                     onChange={(e) => setNewUserName(e.target.value)}
-                    placeholder="e.g. Vikram Rathore"
-                    className="w-full bg-[#1e293b]/30 border border-zinc-800/80 rounded-2xl py-3 px-4 text-white placeholder-zinc-650 focus:outline-none focus:border-primary-accent transition-all text-sm"
+                    placeholder="Enter full name"
+                    className="w-full bg-[#1e293b]/20 border border-zinc-800/80 rounded-xl py-3 px-4 text-white placeholder-zinc-500 focus:outline-none focus:border-primary-accent focus:ring-4 focus:ring-primary-accent/10 transition-all text-sm"
                   />
                 </div>
 
-                <div className="space-y-2">
-                  <label className="text-xs font-bold text-zinc-400 uppercase tracking-wider">Mobile Number</label>
+                <div className="space-y-1.5">
+                  <label className="text-xs font-bold text-zinc-300">
+                    Mobile Number <span className="text-red-500">*</span>
+                  </label>
                   <input
                     type="tel"
                     required
                     maxLength={10}
                     value={newUserMobile}
                     onChange={(e) => setNewUserMobile(e.target.value.replace(/\D/g, ""))}
-                    placeholder="10-digit mobile number"
-                    className="w-full bg-[#1e293b]/30 border border-zinc-800/80 rounded-2xl py-3 px-4 text-white placeholder-zinc-650 focus:outline-none focus:border-primary-accent transition-all text-sm font-mono"
+                    placeholder="+91 1234567890"
+                    className="w-full bg-[#1e293b]/20 border border-zinc-800/80 rounded-xl py-3 px-4 text-white placeholder-zinc-500 focus:outline-none focus:border-primary-accent focus:ring-4 focus:ring-primary-accent/10 transition-all text-sm font-mono"
                   />
                 </div>
+              </div>
 
-                <div className="space-y-2">
-                  <label className="text-xs font-bold text-zinc-400 uppercase tracking-wider">Assigned Role</label>
-                  <select
-                    value={newUserRole}
-                    onChange={(e) => setNewUserRole(e.target.value)}
-                    className="w-full bg-[#1e293b]/30 border border-zinc-800/80 rounded-2xl py-3 px-4 text-white focus:outline-none focus:border-primary-accent transition-all text-sm cursor-pointer"
-                  >
-                    <option value="USER" className="bg-[#0f172a]">USER</option>
-                    {isSuperAdmin && (
-                      <>
-                        <option value="ADMIN" className="bg-[#0f172a]">ADMIN</option>
-                        <option value="SUPER_ADMIN" className="bg-[#0f172a]">SUPER_ADMIN</option>
-                      </>
-                    )}
-                  </select>
-                </div>
-
-                <div className="space-y-2">
-                  <label className="text-xs font-bold text-zinc-400 uppercase tracking-wider">WhatsApp Group Link</label>
-                  <input
-                    type="url"
-                    value={newWhatsappGroup}
-                    onChange={(e) => setNewWhatsappGroup(e.target.value)}
-                    placeholder="https://chat.whatsapp.com/..."
-                    className="w-full bg-[#1e293b]/30 border border-zinc-800/80 rounded-2xl py-3 px-4 text-white placeholder-zinc-650 focus:outline-none focus:border-primary-accent transition-all text-sm"
-                  />
-                </div>
-
-                <div className="flex items-center gap-3 bg-[#111928]/30 border border-zinc-800/60 px-4 py-3 rounded-2xl">
-                  <input
-                    type="checkbox"
-                    id="newAlreadyJoined"
-                    checked={newAlreadyJoined}
-                    onChange={(e) => setNewAlreadyJoined(e.target.checked)}
-                    className="w-4.5 h-4.5 rounded border-zinc-800 text-emerald-500 focus:ring-emerald-500/15 bg-[#1e293b]/30 accent-emerald-500 cursor-pointer"
-                  />
-                  <label htmlFor="newAlreadyJoined" className="text-xs font-bold text-zinc-350 cursor-pointer select-none">
-                    Is already in WhatsApp Group
+              {/* Row 2: Password & Assigned Role */}
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div className="space-y-1.5">
+                  <label className="text-xs font-bold text-zinc-300">
+                    Password <span className="text-red-500">*</span>
                   </label>
+                  <input
+                    type="text"
+                    required
+                    value={newUserPassword}
+                    onChange={(e) => setNewUserPassword(e.target.value)}
+                    placeholder="Enter password"
+                    className="w-full bg-[#1e293b]/20 border border-zinc-800/80 rounded-xl py-3 px-4 text-white placeholder-zinc-500 focus:outline-none focus:border-primary-accent focus:ring-4 focus:ring-primary-accent/10 transition-all text-sm"
+                  />
                 </div>
 
+                <div className="space-y-1.5">
+                  <label className="text-xs font-bold text-zinc-300 block">
+                    Assigned Role <span className="text-red-500">*</span>
+                  </label>
+                  <div className="relative">
+                    <select
+                      value={newUserRole}
+                      onChange={(e) => setNewUserRole(e.target.value)}
+                      className="w-full bg-[#1e293b]/20 border border-zinc-800/80 rounded-xl py-3 px-4 text-white appearance-none focus:outline-none focus:border-primary-accent focus:ring-4 focus:ring-primary-accent/10 transition-all text-sm cursor-pointer"
+                    >
+                      <option value="USER" className="bg-[#0f172a]">USER</option>
+                      {isSuperAdmin && (
+                        <>
+                          <option value="ADMIN" className="bg-[#0f172a]">ADMIN</option>
+                          <option value="SUPER_ADMIN" className="bg-[#0f172a]">SUPER_ADMIN</option>
+                        </>
+                      )}
+                    </select>
+                    <span className="absolute inset-y-0 right-4 flex items-center text-zinc-500 pointer-events-none">
+                      <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
+                        <path strokeLinecap="round" strokeLinejoin="round" d="m19.5 8.25-7.5 7.5-7.5-7.5" />
+                      </svg>
+                    </span>
+                  </div>
+                </div>
+              </div>
+
+              {/* Footer Actions */}
+              <div className="flex justify-end items-center gap-3 pt-4 border-t border-zinc-800/40">
+                <button
+                  type="button"
+                  onClick={() => setIsAddUserOpen(false)}
+                  className="px-5 py-2.5 rounded-xl hover:bg-white/5 text-zinc-400 hover:text-white transition-colors cursor-pointer text-sm font-bold"
+                >
+                  Cancel
+                </button>
                 <button
                   type="submit"
                   style={{ backgroundColor: "var(--primary-accent)" }}
-                  className="w-full text-white font-bold py-3.5 rounded-2xl hover:opacity-90 transition-all duration-200 cursor-pointer shadow-lg mt-4 shadow-primary-accent/10"
+                  className="px-5 py-2.5 text-white font-bold rounded-xl hover:opacity-90 active:scale-[0.98] transition-all duration-200 cursor-pointer shadow-md text-sm"
                 >
                   Create User
                 </button>
-              </form>
-            </div>
-
-            <div className="text-zinc-600 text-xs leading-relaxed">
-              * Note: Accounts added via quick registry default to password <code>123456</code> and their status is active upon entry.
-            </div>
+              </div>
+            </form>
           </div>
         </div>
       )}

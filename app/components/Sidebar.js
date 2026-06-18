@@ -3,6 +3,7 @@
 import React, { useState, useEffect } from "react";
 import { usePathname, useRouter } from "next/navigation";
 import { getCurrentUser, logout } from "../utils/db";
+import Link from "next/link";
 
 export default function Sidebar() {
   const pathname = usePathname();
@@ -60,7 +61,7 @@ export default function Sidebar() {
   }, [accentColor]);
 
   useEffect(() => {
-    if (pathname.includes("/createuser") || pathname.includes("/users") || pathname.includes("/pending-donations") || pathname.includes("/my-donations") || pathname.includes("/reports")) {
+    if (pathname.includes("/users") || pathname.includes("/pending-donations") || pathname.includes("/my-donations") || pathname.includes("/reports")) {
       setUserDropdownOpen(true);
     }
     if (pathname.includes("/donations-history")) {
@@ -81,7 +82,7 @@ export default function Sidebar() {
   const role = currentUser.role;
 
   const isDashboardActive = pathname === basePath;
-  const isUserMgmtActive = role !== "USER" && (pathname === `${basePath}/createuser` || pathname === `${basePath}/users` || pathname === `${basePath}/pending-donations` || pathname === `${basePath}/my-donations` || pathname === `${basePath}/reports` || pathname === `${basePath}/audit-logs`);
+  const isUserMgmtActive = role !== "USER" && (pathname === `${basePath}/users` || pathname === `${basePath}/pending-donations` || pathname === `${basePath}/my-donations` || pathname === `${basePath}/reports` || pathname === `${basePath}/audit-logs`);
   const isClaimsActive = role === "USER" && pathname === `${basePath}/pending-donations`;
   const isDonationsActive = pathname === `${basePath}/donations-history` || pathname === `${basePath}/donations-history/monthly`;
   const isFundActive = pathname === `${basePath}/fund-management/summary` || pathname === `${basePath}/fund-overview` || pathname === `${basePath}/fund-management/create` || pathname === `${basePath}/fund-management/use` || pathname === `${basePath}/fund-management/history`;
@@ -138,6 +139,28 @@ export default function Sidebar() {
         isCollapsed ? "w-[90px]" : "w-[320px]"
       }`}
     >
+      {/* Sidebar Toggle Button (Desktop Only) */}
+      <button
+        onClick={() => setIsCollapsed(!isCollapsed)}
+        className="hidden lg:flex absolute -right-3.5 top-[34px] w-7 h-7 rounded-full bg-white shadow-[0_4px_10px_rgba(0,0,0,0.25)] items-center justify-center z-50 cursor-pointer transition-all hover:scale-110 active:scale-95 border border-zinc-200"
+        aria-label={isCollapsed ? "Expand Sidebar" : "Collapse Sidebar"}
+        style={{ color: accentColor }}
+      >
+        <svg
+          xmlns="http://www.w3.org/2000/svg"
+          fill="none"
+          viewBox="0 0 24 24"
+          strokeWidth={3.2}
+          stroke="currentColor"
+          className="w-3.5 h-3.5"
+        >
+          {isCollapsed ? (
+            <path strokeLinecap="round" strokeLinejoin="round" d="m8.25 4.5 7.5 7.5-7.5 7.5" />
+          ) : (
+            <path strokeLinecap="round" strokeLinejoin="round" d="M15.75 19.5 8.25 12l7.5-7.5" />
+          )}
+        </svg>
+      </button>
 
 
       {/* Top Brand Section */}
@@ -173,7 +196,7 @@ export default function Sidebar() {
       {/* Navigation Links */}
       <div className={`flex-1 flex flex-col gap-2 overflow-y-auto no-scrollbar ${isCollapsed ? "px-3 py-6" : "py-4"}`}>
         {/* Dashboard */}
-        <a
+        <Link
           href={basePath}
           className={getLinkClass(isDashboardActive, false)}
           style={{ color: isDashboardActive && !isCollapsed ? accentColor : undefined }}
@@ -188,7 +211,7 @@ export default function Sidebar() {
               Dashboard
             </span>
           )}
-        </a>
+        </Link>
 
         {/* User Management / Claims - Role Dependent */}
         {role !== "USER" ? (
@@ -224,17 +247,7 @@ export default function Sidebar() {
 
             {!isCollapsed && userDropdownOpen && (
               <div className="mt-1.5 flex flex-col gap-1 animate-[fadeIn_0.15s_ease-out]">
-                <a
-                  href={`${basePath}/createuser`}
-                  className={getLinkClass(pathname === `${basePath}/createuser`, true)}
-                  style={{ color: pathname === `${basePath}/createuser` && !isCollapsed ? accentColor : undefined }}
-                >
-                  <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor" className="w-4 h-4 opacity-70 shrink-0">
-                    <path strokeLinecap="round" strokeLinejoin="round" d="M18 7.5v3m0 0v3m0-3h3m-3 0h-3m-2.25-4.125a3.375 3.375 0 1 1-6.75 0 3.375 3.375 0 0 1 6.75 0ZM3 19.235v-.11a6.375 6.375 0 0 1 12.75 0v.109A12.318 12.318 0 0 1 9.374 21c-2.331 0-4.512-.647-6.374-1.758Z" />
-                  </svg>
-                  <span>Create User</span>
-                </a>
-                <a
+                <Link
                   href={`${basePath}/users`}
                   className={getLinkClass(pathname === `${basePath}/users`, true)}
                   style={{ color: pathname === `${basePath}/users` && !isCollapsed ? accentColor : undefined }}
@@ -243,9 +256,9 @@ export default function Sidebar() {
                     <path strokeLinecap="round" strokeLinejoin="round" d="M8.25 6.75h12M8.25 12h12m-12 5.25h12M3.75 6.75h.007v.008H3.75V6.75Zm.375 0a.375.375 0 1 1-.75 0 .375.375 0 0 1 .75 0ZM3.75 12h.007v.008H3.75V12Zm.375 0a.375.375 0 1 1-.75 0 .375.375 0 0 1 .75 0Zm-.375 5.25h.007v.008H3.75v-.008Zm.375 0a.375.375 0 1 1-.75 0 .375.375 0 0 1 .75 0Z" />
                   </svg>
                   <span>Users List</span>
-                </a>
+                </Link>
                 {role === "SUPER_ADMIN" ? (
-                  <a
+                  <Link
                     href={`${basePath}/pending-donations`}
                     className={getLinkClass(pathname === `${basePath}/pending-donations`, true)}
                     style={{ color: pathname === `${basePath}/pending-donations` && !isCollapsed ? accentColor : undefined }}
@@ -254,9 +267,9 @@ export default function Sidebar() {
                       <path strokeLinecap="round" strokeLinejoin="round" d="M12 6v6h4.5m4.5 0a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z" />
                     </svg>
                     <span>Pending Donations</span>
-                  </a>
+                  </Link>
                 ) : role === "ADMIN" ? (
-                  <a
+                  <Link
                     href={`${basePath}/my-donations`}
                     className={getLinkClass(pathname === `${basePath}/my-donations`, true)}
                     style={{ color: pathname === `${basePath}/my-donations` && !isCollapsed ? accentColor : undefined }}
@@ -265,11 +278,11 @@ export default function Sidebar() {
                       <path strokeLinecap="round" strokeLinejoin="round" d="M9 12h3.75M9 15h3.375m1.875-10.378a3 3 0 0 1 3 3v11.25a3 3 0 0 1-3 3h-9.75a3 3 0 0 1-3-3V7.622a3 3 0 0 1 3-3h9.75ZM9.75 9.75H12v2.25H9.75v-2.25Z" />
                     </svg>
                     <span>My Donation History</span>
-                  </a>
+                  </Link>
                 ) : null}
                 {role === "SUPER_ADMIN" && (
                   <>
-                    <a
+                    <Link
                       href={`${basePath}/reports`}
                       className={getLinkClass(pathname === `${basePath}/reports`, true)}
                       style={{ color: pathname === `${basePath}/reports` && !isCollapsed ? accentColor : undefined }}
@@ -278,8 +291,8 @@ export default function Sidebar() {
                         <path strokeLinecap="round" strokeLinejoin="round" d="M19.5 14.25v-2.625a3.375 3.375 0 0 0-3.375-3.375h-1.5A1.125 1.125 0 0 1 13.5 7.125v-1.5a3.375 3.375 0 0 0-3.375-3.375H8.25m3.75 9v6m3-3H9m1.5-12H5.625c-.621 0-1.125.504-1.125 1.125v17.25c0 .621.504 1.125 1.125 1.125h12.75c.621 0 1.125-.504 1.125-1.125V11.25a9 9 0 0 0-9-9Z" />
                       </svg>
                       <span>Reports</span>
-                    </a>
-                    <a
+                    </Link>
+                    <Link
                       href={`${basePath}/audit-logs`}
                       className={getLinkClass(pathname === `${basePath}/audit-logs`, true)}
                       style={{ color: pathname === `${basePath}/audit-logs` && !isCollapsed ? accentColor : undefined }}
@@ -288,7 +301,7 @@ export default function Sidebar() {
                         <path strokeLinecap="round" strokeLinejoin="round" d="M9 12h6m-6 4h6m2 5H7a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5.586a1 1 0 0 1 .707.293l5.414 5.414a1 1 0 0 1 .293.707V19a2 2 0 0 1-2 2Z" />
                       </svg>
                       <span>Audit Logs</span>
-                    </a>
+                    </Link>
                   </>
                 )}
               </div>
@@ -296,7 +309,7 @@ export default function Sidebar() {
           </div>
         ) : (
           /* Regular User Claims Menu (no dropdown) */
-          <a
+          <Link
             href={`${basePath}/pending-donations`}
             className={getLinkClass(isClaimsActive, false)}
             style={{ color: isClaimsActive && !isCollapsed ? accentColor : undefined }}
@@ -311,7 +324,7 @@ export default function Sidebar() {
                 My Donation Claims
               </span>
             )}
-          </a>
+          </Link>
         )}
 
         {/* Donations History */}
@@ -347,7 +360,7 @@ export default function Sidebar() {
 
           {!isCollapsed && donationsDropdownOpen && (
             <div className="flex flex-col gap-1 border-l border-white/10 animate-[fadeIn_0.15s_ease-out]">
-              <a
+              <Link
                 href={`${basePath}/donations-history`}
                 className={getLinkClass(pathname === `${basePath}/donations-history`, true)}
                 style={{ color: pathname === `${basePath}/donations-history` && !isCollapsed ? accentColor : undefined }}
@@ -356,9 +369,9 @@ export default function Sidebar() {
                   <path strokeLinecap="round" strokeLinejoin="round" d="M9 12h3.75M9 15h3.375m1.875-10.378a3 3 0 0 1 3 3v11.25a3 3 0 0 1-3 3h-9.75a3 3 0 0 1-3-3V7.622a3 3 0 0 1 3-3h9.75ZM9.75 9.75H12v2.25H9.75v-2.25Z" />
                 </svg>
                 <span>{role === "USER" ? "History Logs" : "All Donations"}</span>
-              </a>
+              </Link>
               {role !== "USER" && (
-                <a
+                <Link
                   href={`${basePath}/donations-history/monthly`}
                   className={getLinkClass(pathname === `${basePath}/donations-history/monthly`, true)}
                   style={{ color: pathname === `${basePath}/donations-history/monthly` && !isCollapsed ? accentColor : undefined }}
@@ -367,7 +380,7 @@ export default function Sidebar() {
                     <path strokeLinecap="round" strokeLinejoin="round" d="M6.75 3v2.25M17.25 3v2.25M3 18.75V7.5a2.25 2.25 0 0 1 2.25-2.25h13.5A2.25 2.25 0 0 1 21 7.5v11.25m-18 0A2.25 2.25 0 0 0 5.25 21h13.5A2.25 2.25 0 0 0 21 18.75m-18 0v-7.5A2.25 2.25 0 0 1 5.25 9h13.5A2.25 2.25 0 0 1 21 11.25v7.5m-9-6h.008v.008H12v-.008ZM12 15h.008v.008H12V15Zm0 2.25h.008v.008H12v-.008ZM9.75 15h.008v.008H9.75V15Zm0 2.25h.008v.008H9.75v-.008ZM7.5 15h.008v.008H7.5V15Zm0 2.25h.008v.008H7.5v-.008Zm6.75-4.5h.008v.008h-.008v-.008Zm0 2.25h.008v.008h-.008V15Zm0 2.25h.008v.008h-.008v-.008Zm2.25-4.5h.008v.008H16.5v-.008Zm0 2.25h.008v.008H16.5V15Z" />
                   </svg>
                   <span>Monthly Report</span>
-                </a>
+                </Link>
               )}
             </div>
           )}
@@ -406,7 +419,7 @@ export default function Sidebar() {
 
           {!isCollapsed && fundDropdownOpen && (
             <div className="flex flex-col gap-1 border-l border-white/10 animate-[fadeIn_0.15s_ease-out]">
-              <a
+              <Link
                 href={`${basePath}/fund-management/summary`}
                 className={getLinkClass(pathname === `${basePath}/fund-management/summary` || pathname === `${basePath}/fund-overview`, true)}
                 style={{ color: (pathname === `${basePath}/fund-management/summary` || pathname === `${basePath}/fund-overview`) && !isCollapsed ? accentColor : undefined }}
@@ -415,10 +428,10 @@ export default function Sidebar() {
                   <path strokeLinecap="round" strokeLinejoin="round" d="M19.5 14.25v-2.625a3.375 3.375 0 0 0-3.375-3.375h-1.5A1.125 1.125 0 0 1 13.5 7.125v-1.5a3.375 3.375 0 0 0-3.375-3.375H8.25m0 12.75h7.5m-7.5 3H12M10.5 2.25H5.625c-.621 0-1.125.504-1.125 1.125v17.25c0 .621.504 1.125 1.125 1.125h12.75c.621 0 1.125-.504 1.125-1.125V11.25a9 9 0 0 0-9-9Z" />
                 </svg>
                 <span>Fund Summary</span>
-              </a>
+              </Link>
               {role === "SUPER_ADMIN" && (
                 <>
-                  <a
+                  <Link
                     href={`${basePath}/fund-management/create`}
                     className={getLinkClass(pathname === `${basePath}/fund-management/create`, true)}
                     style={{ color: pathname === `${basePath}/fund-management/create` && !isCollapsed ? accentColor : undefined }}
@@ -427,8 +440,8 @@ export default function Sidebar() {
                       <path strokeLinecap="round" strokeLinejoin="round" d="M12 9v6m3-3H9m12 0a9 9 0 11-18 0 9 9 0 0118 0Z" />
                     </svg>
                     <span>Create Fund</span>
-                  </a>
-                  <a
+                  </Link>
+                  <Link
                     href={`${basePath}/fund-management/use`}
                     className={getLinkClass(pathname === `${basePath}/fund-management/use`, true)}
                     style={{ color: pathname === `${basePath}/fund-management/use` && !isCollapsed ? accentColor : undefined }}
@@ -437,11 +450,11 @@ export default function Sidebar() {
                       <path strokeLinecap="round" strokeLinejoin="round" d="M15 12H9m12 0a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z" />
                     </svg>
                     <span>Use Fund</span>
-                  </a>
+                  </Link>
                 </>
               )}
               {role !== "USER" && (
-                <a
+                <Link
                   href={`${basePath}/fund-management/history`}
                   className={getLinkClass(pathname === `${basePath}/fund-management/history`, true)}
                   style={{ color: pathname === `${basePath}/fund-management/history` && !isCollapsed ? accentColor : undefined }}
@@ -450,14 +463,14 @@ export default function Sidebar() {
                     <path strokeLinecap="round" strokeLinejoin="round" d="M12 6v6h4.5m4.5 0a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z" />
                   </svg>
                   <span>Fund History</span>
-                </a>
+                </Link>
               )}
             </div>
           )}
         </div>
 
         {/* Settings */}
-        <a
+        <Link
           href={`${basePath}/settings`}
           className={getLinkClass(isSettingsActive, false)}
           style={{ color: isSettingsActive && !isCollapsed ? accentColor : undefined }}
@@ -473,10 +486,10 @@ export default function Sidebar() {
               {role === "USER" ? "My Profile" : "Settings"}
             </span>
           )}
-        </a>
+        </Link>
 
         {/* Theme Settings */}
-        <a
+        <Link
           href={`${basePath}/Theme`}
           className={getLinkClass(isThemeActive, false)}
           style={{ color: isThemeActive && !isCollapsed ? accentColor : undefined }}
@@ -502,7 +515,7 @@ export default function Sidebar() {
               }}
             ></div>
           )}
-        </a>
+        </Link>
       </div>
 
       {/* Bottom Profile Section with Logout */}

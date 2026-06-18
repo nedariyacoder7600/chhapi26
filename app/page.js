@@ -3,7 +3,7 @@
 import React, { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { getUsers, setCurrentUser, getCurrentUser, addAuditLog } from "./utils/db";
-import DonationLoader from "./components/DonationLoader";
+
 
 export default function Home() {
   const router = useRouter();
@@ -118,10 +118,6 @@ export default function Home() {
       }, 800);
     }, 400);
   };
-
-  if (isLoading) {
-    return <DonationLoader message="Logging you in securely..." />;
-  }
 
   return (
     <div className="dashboard-light-theme min-h-screen bg-[#070b12] text-zinc-100 flex flex-col justify-center items-center p-6 relative overflow-hidden font-sans">

@@ -2,6 +2,7 @@
 
 import React, { useState, useEffect } from "react";
 import { usePathname } from "next/navigation";
+import Link from "next/link";
 
 const initialWallets = [
   { category: "Food Distribution", remaining: 30000, color: "bg-blue-500" },
@@ -118,30 +119,30 @@ export default function UseFundView() {
 
       {/* Navigation Tabs directly inside page layout */}
       <div className="flex border-b border-zinc-800/80 mb-8 z-10 relative overflow-x-auto no-scrollbar">
-        <a
+        <Link
           href={`${basePath}/fund-management/summary`}
           className="pb-4 px-6 text-sm font-semibold border-b-2 transition-all border-transparent text-zinc-500 hover:text-zinc-300 whitespace-nowrap"
         >
           Fund Summary
-        </a>
-        <a
+        </Link>
+        <Link
           href={`${basePath}/fund-management/create`}
           className="pb-4 px-6 text-sm font-semibold border-b-2 transition-all border-transparent text-zinc-500 hover:text-zinc-300 whitespace-nowrap"
         >
           Create Fund
-        </a>
-        <a
+        </Link>
+        <Link
           href={`${basePath}/fund-management/use`}
           className="pb-4 px-6 text-sm font-bold border-b-2 transition-all border-primary-accent text-white whitespace-nowrap"
         >
           Use Fund
-        </a>
-        <a
+        </Link>
+        <Link
           href={`${basePath}/fund-management/history`}
           className="pb-4 px-6 text-sm font-semibold border-b-2 transition-all border-transparent text-zinc-500 hover:text-zinc-300 whitespace-nowrap"
         >
           Fund History
-        </a>
+        </Link>
       </div>
 
       {/* Form and Available Balances Layout */}

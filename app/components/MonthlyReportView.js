@@ -2,6 +2,7 @@
 
 import React, { useState, useEffect } from "react";
 import { usePathname } from "next/navigation";
+import Link from "next/link";
 
 const monthlyHistory = [
   { month: "October 2026", amount: 275000, contributors: 245, topCampaign: "Emergency Medical Aid", status: "Under Audit Review", color: "from-amber-500 to-rose-600", weekly: [60000, 75000, 80000, 60000] },
@@ -114,18 +115,18 @@ export default function MonthlyReportView() {
 
       {/* Navigation Tabs directly inside page layout */}
       <div className="flex border-b border-zinc-800/80 mb-8 z-10 relative">
-        <a
+        <Link
           href={`${basePath}/donations-history`}
           className="pb-4 px-6 text-sm font-semibold border-b-2 transition-all border-transparent text-zinc-500 hover:text-zinc-300"
         >
           All Donation List
-        </a>
-        <a
+        </Link>
+        <Link
           href={`${basePath}/donations-history/monthly`}
           className="pb-4 px-6 text-sm font-bold border-b-2 transition-all border-primary-accent text-white"
         >
           Monthly Summary Report
-        </a>
+        </Link>
       </div>
 
       {/* Monthly Key Metrics Cards */}

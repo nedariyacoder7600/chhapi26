@@ -3,6 +3,7 @@
 import React, { useState, useEffect } from "react";
 import { usePathname } from "next/navigation";
 import { getCurrentUser, getDonationsHistory, getPendingDonations } from "../utils/db";
+import Link from "next/link";
 
 export default function DonationsHistoryView({ forceMyDonations = false }) {
   const pathname = usePathname();
@@ -185,18 +186,18 @@ export default function DonationsHistoryView({ forceMyDonations = false }) {
       {/* Navigation Tabs - Hide monthly summaries for regular users */}
       {!displayOnlyMy && (
         <div className="flex border-b border-zinc-800/80 mb-8 z-10 relative">
-          <a
+          <Link
             href={`${basePath}/donations-history`}
             className="pb-4 px-6 text-sm font-bold border-b-2 transition-all border-primary-accent text-white"
           >
             All Donation List
-          </a>
-          <a
+          </Link>
+          <Link
             href={`${basePath}/donations-history/monthly`}
             className="pb-4 px-6 text-sm font-semibold border-b-2 transition-all border-transparent text-zinc-500 hover:text-zinc-300"
           >
             Monthly Summary Report
-          </a>
+          </Link>
         </div>
       )}
 

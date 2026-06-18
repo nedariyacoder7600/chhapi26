@@ -349,6 +349,16 @@ nextjs-portal,
   box-shadow: 6px -6px 0 0 var(--light-bg) !important;
 }
 
+/* 15. Custom Inputs Active / Focus state styling (Light and Dark theme support) */
+input:focus,
+select:focus,
+textarea:focus {
+  border-color: var(--primary-accent) !important;
+  box-shadow: 0 0 0 3.5px color-mix(in srgb, var(--primary-accent) 25%, transparent) !important;
+  outline: none !important;
+  transition: all 0.15s ease-in-out;
+}
+
 
 
 

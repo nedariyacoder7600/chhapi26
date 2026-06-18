@@ -1,6 +1,7 @@
 "use client";
 import React, { useState, useEffect } from "react";
 import { getAuditLogs, saveAuditLogs, getCurrentUser } from "../utils/db";
+import Link from "next/link";
 
 export default function AuditLogsView() {
   const [currentUser, setCurrentUser] = useState(null);
@@ -53,12 +54,12 @@ export default function AuditLogsView() {
           <p className="text-zinc-400 text-xs leading-relaxed">
             Your account tier ({currentUser.role.replace("_", " ")}) does not possess authorization to view administrative system audit logs.
           </p>
-          <a
+          <Link
             href="/dashboard"
             className="inline-block px-5 py-2.5 bg-zinc-800 hover:bg-zinc-700 text-white font-bold rounded-xl transition-all cursor-pointer text-xs"
           >
             Back to Dashboard
-          </a>
+          </Link>
         </div>
       </div>
     );

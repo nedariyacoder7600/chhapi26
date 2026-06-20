@@ -11,6 +11,14 @@ const initialUsers = [
   { id: 5, name: "Rahul Sharma", mobile: "9900887766", password: "Rahul@123", role: "USER", status: "Active", joined: "2026-04-01", donations: 8500, color: "from-cyan-500 to-blue-600", addedBy: "Amir Admin" },
   { id: 6, name: "Priya Patel", mobile: "9123456789", password: "Priya@123", role: "USER", status: "Inactive", joined: "2026-04-18", donations: 0, color: "from-purple-500 to-indigo-500", addedBy: "Mohammad Yunus" },
   { id: 7, name: "Vikram Rathore", mobile: "8899776655", password: "Vikram@123", role: "ADMIN", status: "Active", joined: "2026-05-12", donations: 62000, color: "from-amber-500 to-rose-600", addedBy: "Mohammad Yunus" },
+  { id: 8, name: "Sandeep Patel", mobile: "9876123450", password: "Sandeep@123", role: "USER", status: "Active", joined: "2026-05-20", donations: 18000, color: "from-violet-600 to-indigo-600", addedBy: "System" },
+  { id: 9, name: "Fatima Sheikh", mobile: "9012837465", password: "Fatima@123", role: "USER", status: "Active", joined: "2026-05-25", donations: 3400, color: "from-emerald-400 to-teal-700", addedBy: "Amir Admin" },
+  { id: 10, name: "Rajesh Varma", mobile: "8127394850", password: "Rajesh@123", role: "USER", status: "Active", joined: "2026-06-01", donations: 0, color: "from-cyan-500 to-blue-600", addedBy: "Mohammad Yunus" },
+  { id: 11, name: "Amit Sharma", mobile: "9876540192", password: "Amit@123", role: "USER", status: "Active", joined: "2026-06-02", donations: 56000, color: "from-purple-500 to-indigo-500", addedBy: "System" },
+  { id: 12, name: "Neha Patel", mobile: "7890123456", password: "Neha@123", role: "USER", status: "Active", joined: "2026-06-05", donations: 4200, color: "from-amber-500 to-rose-600", addedBy: "System" },
+  { id: 13, name: "Karan Johar", mobile: "8901234567", password: "Karan@123", role: "USER", status: "Active", joined: "2026-06-07", donations: 9500, color: "from-violet-600 to-indigo-600", addedBy: "Amir Admin" },
+  { id: 14, name: "Suresh Raina", mobile: "9012345679", password: "Suresh@123", role: "USER", status: "Active", joined: "2026-06-10", donations: 27000, color: "from-emerald-400 to-teal-700", addedBy: "Mohammad Yunus" },
+  { id: 15, name: "Deepika Padukone", mobile: "9876543211", password: "Deepika@123", role: "USER", status: "Active", joined: "2026-06-12", donations: 110000, color: "from-red-500 to-pink-600", addedBy: "System" }
 ];
 
 const initialDonations = [
@@ -55,13 +63,13 @@ const initialFunds = [
 
 // Initialize DB structure
 if (isBrowser) {
-  if (!localStorage.getItem("chhapi_data_reinit_v4")) {
+  if (!localStorage.getItem("chhapi_data_reinit_v5")) {
     localStorage.setItem("chhapi_users", JSON.stringify(initialUsers));
     localStorage.setItem("chhapi_pending_donations", JSON.stringify(initialDonations));
     localStorage.setItem("chhapi_donations_history", JSON.stringify(initialHistory));
     localStorage.setItem("chhapi_audit_logs", JSON.stringify(initialAuditLogs));
     localStorage.setItem("chhapi_funds", JSON.stringify(initialFunds));
-    localStorage.setItem("chhapi_data_reinit_v4", "true");
+    localStorage.setItem("chhapi_data_reinit_v5", "true");
   } else {
     if (!localStorage.getItem("chhapi_users")) {
       localStorage.setItem("chhapi_users", JSON.stringify(initialUsers));

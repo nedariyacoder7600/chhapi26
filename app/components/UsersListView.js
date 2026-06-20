@@ -32,6 +32,15 @@ export default function UsersListView() {
   const [editUserWhatsappGroup, setEditUserWhatsappGroup] = useState("");
   const [editAlreadyJoined, setEditAlreadyJoined] = useState(false);
 
+  // Pagination states
+  const [currentPage, setCurrentPage] = useState(1);
+  const USERS_PER_PAGE = 10;
+
+  // Reset pagination on filter or search changes
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [searchTerm, roleFilter, creatorFilter]);
+
   useEffect(() => {
     const user = getCurrentUser();
     setCurrentUser(user);
@@ -105,6 +114,12 @@ export default function UsersListView() {
     const matchesCreator = creatorFilter === "ALL" || userCreator === creatorFilter;
     return matchesSearch && matchesRole && matchesCreator;
   });
+
+  const totalPages = Math.ceil(filteredUsers.length / USERS_PER_PAGE);
+  const paginatedUsers = filteredUsers.slice(
+    (currentPage - 1) * USERS_PER_PAGE,
+    currentPage * USERS_PER_PAGE
+  );
 
   const toggleStatus = (id, name, userRole) => {
     // Admins cannot change statuses of Admins or Super Admins
@@ -306,120 +321,33 @@ export default function UsersListView() {
       {/* Stat Summary Metrics Grid */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-8 z-10 relative">
         {/* Card 1: Total Registries */}
-        <div className="bg-gradient-to-br from-[#0e1325]/90 to-[#080c16]/95 border border-cyan-500/35 rounded-[24px] p-5 min-h-[140px] h-auto relative backdrop-blur-xl flex flex-col justify-between overflow-hidden group hover:border-cyan-400 hover:shadow-[0_0_30px_rgba(6,182,212,0.2)] transition-all duration-500 shadow-2xl">
-          <div className="absolute -top-12 -right-12 w-24 h-24 rounded-full bg-cyan-500/10 blur-2xl pointer-events-none group-hover:bg-cyan-500/20 group-hover:scale-110 transition-all duration-500" />
-          <div className="absolute bottom-0 left-0 right-0 h-[3px] bg-gradient-to-r from-cyan-600 via-cyan-500 to-cyan-600 shadow-[0_0_12px_#06b6d4] opacity-90" />
-          
-          <div className="space-y-2.5 min-w-0 w-full z-10 flex flex-col justify-between flex-1">
-            <div className="flex justify-between items-start gap-3 w-full">
-              <div className="min-w-0 flex-1 pt-1.5">
-                <span className="text-[11px] font-bold text-zinc-400 uppercase tracking-widest block">Total Registries</span>
-              </div>
-              <div className="w-12 h-12 rounded-[16px] border border-cyan-500/30 flex items-center justify-center bg-[#0d1222]/80 shadow-[0_0_15px_rgba(6,182,212,0.15)] shrink-0 group-hover:scale-110 group-hover:rotate-3 group-hover:border-cyan-500/50 group-hover:shadow-[0_0_20px_rgba(6,182,212,0.3)] transition-all duration-300">
-                <div className="w-8 h-8 rounded-full border border-cyan-500/60 flex items-center justify-center bg-transparent">
-                  <svg className="w-4.5 h-4.5 text-cyan-400 drop-shadow-[0_0_6px_rgba(6,182,212,0.4)]" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
-                    <path strokeLinecap="round" strokeLinejoin="round" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
-                  </svg>
-                </div>
-              </div>
-            </div>
-            <div className="w-full">
-              <span className="text-3xl font-extrabold text-cyan-400 block tracking-tight drop-shadow-[0_0_8px_rgba(6,182,212,0.2)] group-hover:text-cyan-300 group-hover:drop-shadow-[0_0_15px_rgba(6,182,212,0.5)] transition-all duration-300">{totalUsers}</span>
-            </div>
-            <div className="text-[11px] text-zinc-400 font-semibold flex items-center gap-1 w-full">
-              <span>System registry entries</span>
-            </div>
-          </div>
+        <div className="registry-stat-card">
+          <span className="card-title">Total Registries</span>
+          <span className="card-value text-cyan-400">{totalUsers}</span>
+          <span className="card-description">System registry entries.</span>
         </div>
 
         {/* Card 2: Active Accounts */}
-        <div className="bg-gradient-to-br from-[#0e1325]/90 to-[#080c16]/95 border border-emerald-500/35 rounded-[24px] p-5 min-h-[140px] h-auto relative backdrop-blur-xl flex flex-col justify-between overflow-hidden group hover:border-emerald-400 hover:shadow-[0_0_30px_rgba(16,185,129,0.2)] transition-all duration-500 shadow-2xl">
-          <div className="absolute -top-12 -right-12 w-24 h-24 rounded-full bg-emerald-500/10 blur-2xl pointer-events-none group-hover:bg-emerald-500/20 group-hover:scale-110 transition-all duration-500" />
-          <div className="absolute bottom-0 left-0 right-0 h-[3px] bg-gradient-to-r from-emerald-600 via-emerald-500 to-emerald-600 shadow-[0_0_12px_#10b981] opacity-90" />
-          
-          <div className="space-y-2.5 min-w-0 w-full z-10 flex flex-col justify-between flex-1">
-            <div className="flex justify-between items-start gap-3 w-full">
-              <div className="min-w-0 flex-1 pt-1.5">
-                <span className="text-[11px] font-bold text-zinc-400 uppercase tracking-widest block">Active Accounts</span>
-              </div>
-              <div className="w-12 h-12 rounded-[16px] border border-emerald-500/30 flex items-center justify-center bg-[#0d1222]/80 shadow-[0_0_15px_rgba(16,185,129,0.15)] shrink-0 group-hover:scale-110 group-hover:rotate-3 group-hover:border-emerald-500/50 group-hover:shadow-[0_0_20px_rgba(16,185,129,0.3)] transition-all duration-300">
-                <div className="w-8 h-8 rounded-full border border-emerald-500/60 flex items-center justify-center bg-transparent">
-                  <span className="w-3.5 h-3.5 rounded-full bg-emerald-400 animate-pulse shadow-[0_0_10px_rgba(52,211,153,0.8)]"></span>
-                </div>
-              </div>
-            </div>
-            <div className="w-full">
-              <span className="text-3xl font-extrabold text-emerald-400 block tracking-tight drop-shadow-[0_0_8px_rgba(16,185,129,0.2)] group-hover:text-emerald-300 group-hover:drop-shadow-[0_0_15px_rgba(16,185,129,0.5)] transition-all duration-300">{activeUsers}</span>
-            </div>
-            <div className="text-[11px] text-zinc-400 font-semibold flex items-center gap-1 w-full">
-              <span>Currently active sessions</span>
-            </div>
-          </div>
+        <div className="registry-stat-card">
+          <span className="card-title">Active Accounts</span>
+          <span className="card-value text-emerald-400">{activeUsers}</span>
+          <span className="card-description">Currently active sessions.</span>
         </div>
 
         {/* Card 3: Administrators */}
-        <div className="bg-gradient-to-br from-[#0e1325]/90 to-[#080c16]/95 border border-purple-500/35 rounded-[24px] p-5 min-h-[140px] h-auto relative backdrop-blur-xl flex flex-col justify-between overflow-hidden group hover:border-purple-400 hover:shadow-[0_0_30px_rgba(139,92,246,0.2)] transition-all duration-500 shadow-2xl">
-          <div className="absolute -top-12 -right-12 w-24 h-24 rounded-full bg-purple-500/10 blur-2xl pointer-events-none group-hover:bg-purple-500/20 group-hover:scale-110 transition-all duration-500" />
-          <div className="absolute bottom-0 left-0 right-0 h-[3px] bg-gradient-to-r from-purple-600 via-purple-500 to-purple-600 shadow-[0_0_12px_#8b5cf6] opacity-90" />
-          
-          <div className="space-y-2.5 min-w-0 w-full z-10 flex flex-col justify-between flex-1">
-            <div className="flex justify-between items-start gap-3 w-full">
-              <div className="min-w-0 flex-1 pt-1.5">
-                <span className="text-[11px] font-bold text-zinc-400 uppercase tracking-widest block">Administrators</span>
-              </div>
-              <div className="w-12 h-12 rounded-[16px] border border-purple-500/30 flex items-center justify-center bg-[#0d1222]/80 shadow-[0_0_15px_rgba(139,92,246,0.15)] shrink-0 group-hover:scale-110 group-hover:rotate-3 group-hover:border-purple-500/50 group-hover:shadow-[0_0_20px_rgba(139,92,246,0.3)] transition-all duration-300">
-                <div className="w-8 h-8 rounded-full border border-purple-500/60 flex items-center justify-center bg-transparent">
-                  <svg className="w-4.5 h-4.5 text-purple-400 drop-shadow-[0_0_6px_rgba(139,92,246,0.4)]" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
-                    <path strokeLinecap="round" strokeLinejoin="round" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
-                  </svg>
-                </div>
-              </div>
-            </div>
-            <div className="w-full">
-              <span className="text-3xl font-extrabold text-purple-400 block tracking-tight drop-shadow-[0_0_8px_rgba(139,92,246,0.2)] group-hover:text-purple-300 group-hover:drop-shadow-[0_0_15px_rgba(139,92,246,0.5)] transition-all duration-300">
-                {users.filter(u => u.role.includes("ADMIN")).length}
-              </span>
-            </div>
-            <div className="text-[11px] text-zinc-400 font-semibold flex items-center gap-1 w-full">
-              <span>System administrative tier</span>
-            </div>
-          </div>
+        <div className="registry-stat-card">
+          <span className="card-title">Administrators</span>
+          <span className="card-value text-purple-400">
+            {users.filter(u => u.role.includes("ADMIN")).length}
+          </span>
+          <span className="card-description">System administrative tier.</span>
         </div>
 
         {/* Card 4: Total Contributed */}
-        <div className="bg-gradient-to-br from-[#0e1325]/90 to-[#080c16]/95 border border-amber-500/35 rounded-[24px] p-5 min-h-[140px] h-auto relative backdrop-blur-xl flex flex-col justify-between overflow-hidden group hover:border-amber-400 hover:shadow-[0_0_30px_rgba(245,158,11,0.2)] transition-all duration-500 shadow-2xl">
-          <div className="absolute -top-12 -right-12 w-24 h-24 rounded-full bg-amber-500/10 blur-2xl pointer-events-none group-hover:bg-amber-500/20 group-hover:scale-110 transition-all duration-500" />
-          <div className="absolute bottom-0 left-0 right-0 h-[3px] bg-gradient-to-r from-amber-600 via-amber-500 to-amber-600 shadow-[0_0_12px_#f59e0b] opacity-90" />
-          
-          <div className="space-y-2.5 min-w-0 w-full z-10 flex flex-col justify-between flex-1">
-            <div className="flex justify-between items-start gap-3 w-full">
-              <div className="min-w-0 flex-1 pt-1.5">
-                <div className="relative group/tooltip inline-block">
-                  <span className="text-[11px] font-bold text-zinc-400 uppercase tracking-widest block cursor-help">
-                    Total Contributed
-                  </span>
-                  <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 w-max opacity-0 scale-95 pointer-events-none group-hover/tooltip:opacity-100 group-hover/tooltip:scale-100 transition-all duration-300 ease-out z-30">
-                    <div className="bg-[#0e1325]/95 backdrop-blur-md border border-amber-500/30 px-3 py-1.5 rounded-xl shadow-[0_10px_30px_rgba(0,0,0,0.8),0_0_15px_rgba(245,158,11,0.1)] text-[10px] font-extrabold text-amber-400 tracking-wider uppercase flex items-center gap-1.5">
-                      <span className="w-1.5 h-1.5 rounded-full bg-amber-400 animate-pulse"></span>
-                      Total Contributed
-                    </div>
-                    <div className="w-2 h-2 bg-[#0e1325] border-r border-b border-amber-500/30 rotate-45 absolute top-full left-1/2 -translate-x-1/2 -translate-y-[5px]"></div>
-                  </div>
-                </div>
-              </div>
-              <div className="w-12 h-12 rounded-[16px] border border-amber-500/30 flex items-center justify-center bg-[#0d1222]/80 shadow-[0_0_15px_rgba(245,158,11,0.15)] shrink-0 group-hover:scale-110 group-hover:rotate-3 group-hover:border-amber-500/50 group-hover:shadow-[0_0_20px_rgba(245,158,11,0.3)] transition-all duration-300">
-                <div className="w-8 h-8 rounded-full border border-amber-500/60 flex items-center justify-center bg-transparent">
-                  <span className="text-amber-400 font-black text-lg drop-shadow-[0_0_6px_rgba(245,158,11,0.5)]">$</span>
-                </div>
-              </div>
-            </div>
-            <div className="w-full">
-              <span className="text-3xl font-extrabold text-amber-400 block tracking-tight drop-shadow-[0_0_8px_rgba(245,158,11,0.2)] group-hover:text-amber-400 group-hover:drop-shadow-[0_0_15px_rgba(245,158,11,0.5)] transition-all duration-300">₹{totalDonationsSum.toLocaleString("en-IN")}</span>
-            </div>
-            <div className="text-[11px] text-zinc-400 font-semibold flex items-center gap-1 w-full">
-              <span>Gross collection registry</span>
-            </div>
-          </div>
+        <div className="registry-stat-card">
+          <span className="card-title">Total Contributed</span>
+          <span className="card-value text-amber-400">₹{totalDonationsSum.toLocaleString("en-IN")}</span>
+          <span className="card-description">Gross collection registry.</span>
         </div>
       </div>
 
@@ -502,7 +430,7 @@ export default function UsersListView() {
             </thead>
             <tbody className="divide-y divide-zinc-800/40 text-sm">
               {filteredUsers.length > 0 ? (
-                filteredUsers.map((user) => (
+                paginatedUsers.map((user) => (
                   <tr key={user.id} className="hover:bg-white/[0.02] transition-colors group">
                     <td className="py-4.5 px-6">
                       <div className="flex items-center gap-3">
@@ -614,7 +542,7 @@ export default function UsersListView() {
 
       {/* Mobile Card Grid */}
       <div className="md:hidden space-y-4 z-10 relative">
-        {filteredUsers.map((user) => (
+        {paginatedUsers.map((user) => (
           <div key={user.id} className="bg-[#111928]/40 border border-zinc-800/60 rounded-3xl p-5 backdrop-blur-md shadow-md flex flex-col justify-between hover:border-zinc-700/50 transition-all group">
             <div className="flex justify-between items-start gap-4">
               <div className="flex items-center gap-3">
@@ -703,6 +631,52 @@ export default function UsersListView() {
           </div>
         ))}
       </div>
+
+      {/* Pagination Controls */}
+      {totalPages > 1 && (
+        <div className="flex flex-col sm:flex-row justify-between items-center gap-4 mt-8 pt-6 border-t border-zinc-800/40 z-10 relative">
+          <span className="text-xs text-zinc-400 font-semibold">
+            Showing <span className="text-white font-bold">{Math.min((currentPage - 1) * USERS_PER_PAGE + 1, filteredUsers.length)}</span> to{" "}
+            <span className="text-white font-bold">{Math.min(currentPage * USERS_PER_PAGE, filteredUsers.length)}</span> of{" "}
+            <span className="text-white font-bold">{filteredUsers.length}</span> registries
+          </span>
+          <div className="flex items-center gap-2">
+            <button
+              onClick={() => setCurrentPage(prev => Math.max(prev - 1, 1))}
+              disabled={currentPage === 1}
+              className="w-9 h-9 rounded-xl bg-zinc-800/60 border border-zinc-800 text-zinc-300 hover:text-white disabled:opacity-40 disabled:cursor-not-allowed transition-all cursor-pointer flex items-center justify-center shrink-0"
+              title="Previous Page"
+            >
+              <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2.5} stroke="currentColor" className="w-4 h-4">
+                <path strokeLinecap="round" strokeLinejoin="round" d="M15.75 19.5 8.25 12l7.5-7.5" />
+              </svg>
+            </button>
+            {Array.from({ length: totalPages }, (_, i) => i + 1).map((page) => (
+              <button
+                key={page}
+                onClick={() => setCurrentPage(page)}
+                className={`w-9 h-9 text-xs font-black rounded-xl transition-all cursor-pointer border flex items-center justify-center shrink-0 ${
+                  currentPage === page
+                    ? "bg-primary-accent border-primary-accent text-white shadow-lg shadow-primary-accent/15"
+                    : "bg-zinc-800/40 border-zinc-800 text-zinc-400 hover:text-white"
+                }`}
+              >
+                {page}
+              </button>
+            ))}
+            <button
+              onClick={() => setCurrentPage(prev => Math.min(prev + 1, totalPages))}
+              disabled={currentPage === totalPages}
+              className="w-9 h-9 rounded-xl bg-zinc-800/60 border border-zinc-800 text-zinc-300 hover:text-white disabled:opacity-40 disabled:cursor-not-allowed transition-all cursor-pointer flex items-center justify-center shrink-0"
+              title="Next Page"
+            >
+              <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2.5} stroke="currentColor" className="w-4 h-4">
+                <path strokeLinecap="round" strokeLinejoin="round" d="m8.25 4.5 7.5 7.5-7.5 7.5" />
+              </svg>
+            </button>
+          </div>
+        </div>
+      )}
 
       {/* MODAL 1: VIEW PROFILE */}
       {selectedUser && (
@@ -832,7 +806,7 @@ export default function UsersListView() {
                     value={newUserName}
                     onChange={(e) => setNewUserName(e.target.value)}
                     placeholder="Enter full name"
-                    className="w-full bg-[#1e293b]/20 border border-zinc-800/80 rounded-xl py-3 px-4 text-white placeholder-zinc-500 focus:outline-none focus:border-primary-accent focus:ring-4 focus:ring-primary-accent/10 transition-all text-sm"
+                    className="w-full neomorphic-input placeholder-zinc-500 text-sm"
                   />
                 </div>
 
@@ -847,7 +821,7 @@ export default function UsersListView() {
                     value={newUserMobile}
                     onChange={(e) => setNewUserMobile(e.target.value.replace(/\D/g, ""))}
                     placeholder="+91 1234567890"
-                    className="w-full bg-[#1e293b]/20 border border-zinc-800/80 rounded-xl py-3 px-4 text-white placeholder-zinc-500 focus:outline-none focus:border-primary-accent focus:ring-4 focus:ring-primary-accent/10 transition-all text-sm font-mono"
+                    className="w-full neomorphic-input placeholder-zinc-500 text-sm font-mono"
                   />
                 </div>
               </div>
@@ -864,7 +838,7 @@ export default function UsersListView() {
                     value={newUserPassword}
                     onChange={(e) => setNewUserPassword(e.target.value)}
                     placeholder="Enter password"
-                    className="w-full bg-[#1e293b]/20 border border-zinc-800/80 rounded-xl py-3 px-4 text-white placeholder-zinc-500 focus:outline-none focus:border-primary-accent focus:ring-4 focus:ring-primary-accent/10 transition-all text-sm"
+                    className="w-full neomorphic-input placeholder-zinc-500 text-sm"
                   />
                 </div>
 
@@ -876,15 +850,9 @@ export default function UsersListView() {
                     <select
                       value={newUserRole}
                       onChange={(e) => setNewUserRole(e.target.value)}
-                      className="w-full bg-[#1e293b]/20 border border-zinc-800/80 rounded-xl py-3 px-4 text-white appearance-none focus:outline-none focus:border-primary-accent focus:ring-4 focus:ring-primary-accent/10 transition-all text-sm cursor-pointer"
+                      className="w-full neomorphic-input placeholder-zinc-500 text-sm appearance-none cursor-pointer"
                     >
                       <option value="USER" className="bg-[#0f172a]">USER</option>
-                      {isSuperAdmin && (
-                        <>
-                          <option value="ADMIN" className="bg-[#0f172a]">ADMIN</option>
-                          <option value="SUPER_ADMIN" className="bg-[#0f172a]">SUPER_ADMIN</option>
-                        </>
-                      )}
                     </select>
                     <span className="absolute inset-y-0 right-4 flex items-center text-zinc-500 pointer-events-none">
                       <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
@@ -896,18 +864,18 @@ export default function UsersListView() {
               </div>
 
               {/* Footer Actions */}
-              <div className="flex justify-end items-center gap-3 pt-4 border-t border-zinc-800/40">
+              <div className="flex justify-end items-center gap-4 pt-5 border-t border-zinc-800/40">
                 <button
                   type="button"
                   onClick={() => setIsAddUserOpen(false)}
-                  className="px-5 py-2.5 rounded-xl hover:bg-white/5 text-zinc-400 hover:text-white transition-colors cursor-pointer text-sm font-bold"
+                  className="px-6 py-3 rounded-2xl hover:bg-zinc-100/5 dashboard-light-theme:hover:bg-zinc-100 text-zinc-500 hover:text-zinc-700 dashboard-light-theme:text-[#5d6f88] dashboard-light-theme:hover:text-[#2d3a4b] transition-colors cursor-pointer text-sm font-bold"
                 >
                   Cancel
                 </button>
                 <button
                   type="submit"
                   style={{ backgroundColor: "var(--primary-accent)" }}
-                  className="px-5 py-2.5 text-white font-bold rounded-xl hover:opacity-90 active:scale-[0.98] transition-all duration-200 cursor-pointer shadow-md text-sm"
+                  className="px-7 py-3.5 text-white font-bold rounded-2xl hover:opacity-95 active:scale-[0.98] transition-all duration-200 cursor-pointer shadow-lg shadow-primary-accent/25 text-sm"
                 >
                   Create User
                 </button>
@@ -978,12 +946,6 @@ export default function UsersListView() {
                   className="w-full bg-[#1e293b]/30 border border-zinc-800 rounded-2xl py-3 px-4 text-white focus:outline-none focus:border-amber-500 focus:ring-4 focus:ring-amber-500/10 transition-all text-sm cursor-pointer"
                 >
                   <option value="USER" className="bg-[#0f172a]">USER</option>
-                  {isSuperAdmin && (
-                    <>
-                      <option value="ADMIN" className="bg-[#0f172a]">ADMIN</option>
-                      <option value="SUPER_ADMIN" className="bg-[#0f172a]">SUPER_ADMIN</option>
-                    </>
-                  )}
                 </select>
               </div>
 

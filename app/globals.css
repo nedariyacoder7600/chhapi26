@@ -489,9 +489,278 @@ textarea:focus {
   box-shadow: inset 2px 2px 4px rgba(163, 177, 198, 0.4), inset -2px -2px 4px rgba(255, 255, 255, 0.9), 0 0 0 3px rgba(74, 21, 75, 0.15) !important;
 }
 
+/* ==========================================================================
+   Premium Landing Page Animations & Styling Classes
+   ========================================================================== */
 
+/* Glassmorphism */
+.premium-glass {
+  background: rgba(10, 10, 16, 0.65) !important;
+  backdrop-filter: blur(24px) saturate(180%) !important;
+  border: 1px solid rgba(255, 255, 255, 0.08) !important;
+  box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37) !important;
+}
 
+.premium-glass-light {
+  background: rgba(255, 255, 255, 0.75) !important;
+  backdrop-filter: blur(24px) saturate(180%) !important;
+  border: 1px solid rgba(0, 0, 0, 0.08) !important;
+  box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.07) !important;
+}
 
+/* 3D Parallax & Depth */
+.depth-layer {
+  transition: transform 0.2s cubic-bezier(0.25, 1, 0.5, 1);
+}
 
+.tilt-card {
+  transform-style: preserve-3d;
+  perspective: 1000px;
+  transition: transform 0.5s cubic-bezier(0.23, 1, 0.32, 1);
+}
+
+.tilt-card-inner {
+  transform: translateZ(30px) scale(0.97);
+  transition: transform 0.5s cubic-bezier(0.23, 1, 0.32, 1);
+}
+
+.tilt-card:hover .tilt-card-inner {
+  transform: translateZ(60px) scale(1);
+}
+
+/* Animations */
+@keyframes float-slow {
+  0%, 100% {
+    transform: translateY(0px) rotate(0deg);
+  }
+  50% {
+    transform: translateY(-15px) rotate(2deg);
+  }
+}
+
+@keyframes pulse-soft {
+  0%, 100% {
+    opacity: 0.15;
+    transform: scale(1);
+  }
+  50% {
+    opacity: 0.25;
+    transform: scale(1.05);
+  }
+}
+
+@keyframes scroll-indicator {
+  0% {
+    transform: translate(-50%, 0);
+    opacity: 0;
+  }
+  50% {
+    opacity: 1;
+  }
+  100% {
+    transform: translate(-50%, 12px);
+    opacity: 0;
+  }
+}
+
+@keyframes marquee-horizontal {
+  0% {
+    transform: translateX(0%);
+  }
+  100% {
+    transform: translateX(-50%);
+  }
+}
+
+.animate-float-slow {
+  animation: float-slow 8s ease-in-out infinite;
+}
+
+.animate-float-slower {
+  animation: float-slow 12s ease-in-out infinite alternate;
+}
+
+.animate-pulse-soft {
+  animation: pulse-soft 6s ease-in-out infinite;
+}
+
+.animate-scroll-arrow {
+  animation: scroll-indicator 2.2s cubic-bezier(0.16, 1, 0.3, 1) infinite;
+}
+
+.animate-marquee {
+  animation: marquee-horizontal 30s linear infinite;
+}
+
+.animate-marquee:hover {
+  animation-play-state: paused;
+}
+
+/* Premium Text Gradients */
+.text-gradient-gold {
+  background: linear-gradient(135deg, #fbbf24 0%, #f59e0b 50%, #d97706 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+.text-gradient-purple {
+  background: linear-gradient(135deg, #c084fc 0%, #818cf8 50%, #6366f1 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+.text-gradient-luxury {
+  background: linear-gradient(135deg, #ffffff 0%, #cbd5e1 50%, #475569 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+.text-gradient-awwwards {
+  background: linear-gradient(135deg, #e0f2fe 0%, #38bdf8 50%, #0284c7 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+/* Custom Scroll horizontal */
+.custom-horizontal-scroll::-webkit-scrollbar {
+  height: 4px;
+}
+.custom-horizontal-scroll::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 999px;
+}
+.custom-horizontal-scroll::-webkit-scrollbar-thumb:hover {
+  background: var(--primary-accent);
+}
+
+/* Mobile Profile Circle Styles */
+.mobile-profile-circle {
+  background-color: rgba(255, 255, 255, 0.1) !important;
+  border: 1px solid rgba(255, 255, 255, 0.2) !important;
+  color: #ffffff !important;
+}
+.dashboard-light-theme .mobile-profile-circle {
+  background-color: rgba(15, 23, 42, 0.08) !important;
+  border: 1px solid rgba(15, 23, 42, 0.15) !important;
+  color: #0f172a !important;
+}
+
+/* ==========================================================================
+   Awwwards & Luxury Fashion Cinematic UI Styles
+   ========================================================================== */
+
+/* Animated background gradient mesh */
+@keyframes gradient-shift {
+  0% { background-position: 0% 50%; }
+  50% { background-position: 100% 50%; }
+  100% { background-position: 0% 50%; }
+}
+
+.animated-mesh-bg {
+  background: linear-gradient(-45deg, #070b12, #0d0c1d, #14081e, #050e18);
+  background-size: 400% 400%;
+  animation: gradient-shift 15s ease infinite;
+}
+
+/* Premium Floating blobs */
+@keyframes float-blob {
+  0%, 100% { transform: translateY(0) scale(1); }
+  50% { transform: translateY(-20px) scale(1.08); }
+}
+
+.floating-light-blob {
+  animation: float-blob 8s ease-in-out infinite alternate;
+  filter: blur(120px);
+}
+
+/* Glassmorphism Luxury Cards */
+.awwwards-card {
+  background: rgba(17, 25, 40, 0.35) !important;
+  backdrop-filter: blur(16px) saturate(180%) !important;
+  border: 1px solid rgba(255, 255, 255, 0.06) !important;
+  border-radius: 32px !important;
+  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.25) !important;
+  transition: all 400ms cubic-bezier(0.25, 1, 0.5, 1) !important;
+}
+
+.awwwards-card:hover {
+  transform: translateY(-8px) scale(1.01) !important;
+  border-color: rgba(139, 92, 246, 0.25) !important;
+  box-shadow: 0 20px 50px rgba(139, 92, 246, 0.15) !important;
+}
+
+.dashboard-light-theme .awwwards-card {
+  background: rgba(255, 255, 255, 0.8) !important;
+  border: 1px solid rgba(15, 23, 42, 0.05) !important;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.03) !important;
+}
+
+.dashboard-light-theme .awwwards-card:hover {
+  border-color: rgba(74, 21, 75, 0.2) !important;
+  box-shadow: 0 20px 40px rgba(74, 21, 75, 0.08) !important;
+}
+
+/* Cinematic text reveal animation helper */
+@keyframes reveal-up {
+  from { transform: translateY(100%); }
+  to { transform: translateY(0); }
+}
+
+.reveal-text-container {
+  overflow: hidden;
+  position: relative;
+}
+
+.reveal-text-child {
+  animation: reveal-up 1.2s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+/* Magnetic Hover Interaction */
+.magnetic-btn-wrap {
+  transition: transform 0.2s cubic-bezier(0.25, 1, 0.5, 1);
+}
+
+.magnetic-btn-wrap:hover {
+  transform: scale(1.05);
+}
+
+/* Custom Image Parallax Zoom */
+.parallax-img-container {
+  overflow: hidden;
+  position: relative;
+}
+
+.parallax-img-child {
+  transition: transform 800ms cubic-bezier(0.25, 1, 0.5, 1);
+}
+
+.parallax-img-container:hover .parallax-img-child {
+  transform: scale(1.1);
+}
+
+/* Luxury border gradient on buttons */
+.luxury-btn-gradient {
+  background: linear-gradient(135deg, #7c3aed 0%, #4f46e5 100%);
+  position: relative;
+  overflow: hidden;
+  z-index: 1;
+}
+
+.luxury-btn-gradient::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(135deg, #a78bfa 0%, #818cf8 100%);
+  opacity: 0;
+  z-index: -1;
+  transition: opacity 300ms ease;
+}
+
+.luxury-btn-gradient:hover::before {
+  opacity: 1;
+}
 
 

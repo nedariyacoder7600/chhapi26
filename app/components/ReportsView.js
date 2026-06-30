@@ -135,7 +135,7 @@ export default function ReportsView() {
   const { line, area, coords } = getSvgPathData();
 
   return (
-    <div className="flex-1 p-6 lg:p-10 bg-[#070b12] text-zinc-100 min-h-screen relative overflow-y-auto">
+    <div className="flex-1 p-4 sm:p-6 lg:p-10 pb-24 sm:pb-12 bg-[#070b12] text-zinc-100 relative">
       
       {/* Background decorations */}
       <div className="absolute top-[-5%] left-[-10%] w-[35%] h-[35%] rounded-full bg-violet-600/5 blur-[120px] pointer-events-none"></div>

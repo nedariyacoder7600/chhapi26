@@ -157,7 +157,7 @@ export default function DashboardLayout({ children }) {
           </div>
 
           {/* Profile Circle */}
-          <div className="w-10 h-10 rounded-full bg-white/10 border border-white/20 flex items-center justify-center font-bold text-sm text-white">
+          <div className="w-10 h-10 rounded-full mobile-profile-circle flex items-center justify-center font-bold text-sm text-white">
             {currentUser.name.charAt(0).toUpperCase()}
           </div>
         </div>

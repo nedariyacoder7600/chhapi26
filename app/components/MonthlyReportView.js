@@ -90,7 +90,7 @@ export default function MonthlyReportView() {
   }, [isExporting]);
 
   return (
-    <div className="flex-1 p-6 lg:p-10 bg-[#070b12] text-zinc-100 min-h-screen relative overflow-y-auto">
+    <div className="flex-1 p-4 sm:p-6 lg:p-10 pb-24 sm:pb-12 bg-[#070b12] text-zinc-100 relative">
       {/* Background decoration */}
       <div className="absolute top-[-5%] left-[-10%] w-[35%] h-[35%] rounded-full bg-violet-600/5 blur-[120px] pointer-events-none"></div>
       <div className="absolute bottom-[-10%] right-[-10%] w-[35%] h-[35%] rounded-full bg-indigo-500/5 blur-[120px] pointer-events-none"></div>
@@ -181,44 +181,47 @@ export default function MonthlyReportView() {
           )}
         </div>
 
-        {/* Month Selector (3/12 cols) */}
-        <div className="md:col-span-3 relative">
-          <select
-            value={selectedMonthFilter}
-            onChange={(e) => setSelectedMonthFilter(e.target.value)}
-            className="w-full bg-[#111928]/40 border border-zinc-800/80 rounded-2xl py-3.5 pl-4 pr-10 text-white appearance-none focus:outline-none focus:border-primary-accent transition-all text-sm cursor-pointer"
-          >
-            {monthsList.map((m) => (
-              <option key={m} value={m} className="bg-[#0f172a]">
-                {m === "ALL" ? "All Months" : m}
-              </option>
-            ))}
-          </select>
-          <span className="absolute inset-y-0 right-4 flex items-center text-zinc-500 pointer-events-none">
-            <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
-              <path strokeLinecap="round" strokeLinejoin="round" d="m19.5 8.25-7.5 7.5-7.5-7.5" />
-            </svg>
-          </span>
-        </div>
+        {/* Selectors container side-by-side on mobile */}
+        <div className="grid grid-cols-2 gap-3 md:col-span-6">
+          {/* Month Selector */}
+          <div className="relative">
+            <select
+              value={selectedMonthFilter}
+              onChange={(e) => setSelectedMonthFilter(e.target.value)}
+              className="w-full bg-[#111928]/40 border border-zinc-800/80 rounded-2xl py-3.5 pl-4 pr-10 text-white appearance-none focus:outline-none focus:border-primary-accent transition-all text-sm cursor-pointer"
+            >
+              {monthsList.map((m) => (
+                <option key={m} value={m} className="bg-[#0f172a]">
+                  {m === "ALL" ? "All Months" : m}
+                </option>
+              ))}
+            </select>
+            <span className="absolute inset-y-0 right-4 flex items-center text-zinc-500 pointer-events-none">
+              <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
+                <path strokeLinecap="round" strokeLinejoin="round" d="m19.5 8.25-7.5 7.5-7.5-7.5" />
+              </svg>
+            </span>
+          </div>
 
-        {/* Year Selector (3/12 cols) */}
-        <div className="md:col-span-3 relative">
-          <select
-            value={selectedYear}
-            onChange={(e) => setSelectedYear(e.target.value)}
-            className="w-full bg-[#111928]/40 border border-zinc-800/80 rounded-2xl py-3.5 pl-4 pr-10 text-white appearance-none focus:outline-none focus:border-primary-accent transition-all text-sm cursor-pointer"
-          >
-            {yearsList.map((y) => (
-              <option key={y} value={y} className="bg-[#0f172a]">
-                {y === "ALL" ? "All Years" : y}
-              </option>
-            ))}
-          </select>
-          <span className="absolute inset-y-0 right-4 flex items-center text-zinc-500 pointer-events-none">
-            <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
-              <path strokeLinecap="round" strokeLinejoin="round" d="m19.5 8.25-7.5 7.5-7.5-7.5" />
-            </svg>
-          </span>
+          {/* Year Selector */}
+          <div className="relative">
+            <select
+              value={selectedYear}
+              onChange={(e) => setSelectedYear(e.target.value)}
+              className="w-full bg-[#111928]/40 border border-zinc-800/80 rounded-2xl py-3.5 pl-4 pr-10 text-white appearance-none focus:outline-none focus:border-primary-accent transition-all text-sm cursor-pointer"
+            >
+              {yearsList.map((y) => (
+                <option key={y} value={y} className="bg-[#0f172a]">
+                  {y === "ALL" ? "All Years" : y}
+                </option>
+              ))}
+            </select>
+            <span className="absolute inset-y-0 right-4 flex items-center text-zinc-500 pointer-events-none">
+              <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
+                <path strokeLinecap="round" strokeLinejoin="round" d="m19.5 8.25-7.5 7.5-7.5-7.5" />
+              </svg>
+            </span>
+          </div>
         </div>
       </div>
 
@@ -302,29 +305,29 @@ export default function MonthlyReportView() {
       <div className="md:hidden space-y-4 z-10 relative">
         {filteredReport.length > 0 ? (
           filteredReport.map((item) => (
-            <div key={item.month} className="bg-[#111928]/40 border border-zinc-800/60 rounded-3xl p-5 backdrop-blur-md shadow-md flex flex-col justify-between hover:border-zinc-700/50 transition-all group">
-              <div className="flex justify-between items-start gap-4">
-                <div className="flex items-center gap-3">
-                  <div className={`w-10 h-10 rounded-xl bg-gradient-to-br ${item.color || 'from-zinc-700 to-zinc-800'} flex items-center justify-center font-bold text-sm text-white shrink-0 shadow-inner`}>
+            <div key={item.month} className="bg-[#111928]/40 border border-zinc-800/60 rounded-3xl p-4 sm:p-5 backdrop-blur-md shadow-md flex flex-col justify-between hover:border-zinc-700/50 transition-all group">
+              <div className="flex justify-between items-center gap-2">
+                <div className="flex items-center gap-2 sm:gap-3 min-w-0">
+                  <div className={`w-9 h-9 sm:w-10 sm:h-10 rounded-xl bg-gradient-to-br ${item.color || 'from-zinc-700 to-zinc-800'} flex items-center justify-center font-bold text-xs sm:text-sm text-white shrink-0 shadow-inner`}>
                     {item.month.slice(0, 3).toUpperCase()}
                   </div>
-                  <span className="font-semibold text-white text-base leading-tight group-hover:text-primary-accent transition-all">{item.month}</span>
+                  <span className="font-semibold text-white text-sm sm:text-base leading-tight group-hover:text-primary-accent transition-all truncate">{item.month}</span>
                 </div>
-                <span className="text-emerald-400 font-bold font-mono text-base shrink-0">₹{item.amount.toLocaleString("en-IN")}</span>
+                <span className="text-emerald-400 font-bold font-mono text-sm sm:text-base shrink-0">₹{item.amount.toLocaleString("en-IN")}</span>
               </div>
 
-              <div className="space-y-2 mt-4 pt-4 border-t border-zinc-800/40 text-xs">
-                <div className="flex justify-between">
-                  <span className="text-zinc-500">Top Campaign</span>
-                  <span className="text-zinc-300 font-medium">{item.topCampaign}</span>
+              <div className="space-y-2.5 mt-4 pt-4 border-t border-zinc-800/40 text-xs">
+                <div className="flex justify-between items-center gap-4">
+                  <span className="text-zinc-500 shrink-0">Top Campaign</span>
+                  <span className="text-zinc-300 font-medium text-right truncate max-w-[65%]">{item.topCampaign}</span>
                 </div>
-                <div className="flex justify-between">
-                  <span className="text-zinc-500">Donors Count</span>
-                  <span className="text-zinc-400 font-mono">{item.contributors} accounts</span>
+                <div className="flex justify-between items-center gap-4">
+                  <span className="text-zinc-500 shrink-0">Donors Count</span>
+                  <span className="text-zinc-400 font-mono text-right">{item.contributors} accounts</span>
                 </div>
-                <div className="flex justify-between">
-                  <span className="text-zinc-500">Audit Status</span>
-                  <span className={`inline-flex items-center gap-1.5 text-xs font-semibold px-2 py-0.5 rounded-full ${
+                <div className="flex justify-between items-center gap-4">
+                  <span className="text-zinc-500 shrink-0">Audit Status</span>
+                  <span className={`inline-flex items-center gap-1.5 text-[11px] font-semibold px-2 py-0.5 rounded-full ${
                     item.status.includes("Review")
                       ? "bg-amber-500/10 text-amber-400"
                       : "bg-emerald-500/10 text-emerald-400"
@@ -337,7 +340,7 @@ export default function MonthlyReportView() {
                 </div>
               </div>
 
-              <div className="mt-5 pt-4 border-t border-zinc-800/40">
+              <div className="mt-4 pt-3 border-t border-zinc-800/40">
                 <button
                   onClick={() => setSelectedMonth(item)}
                   className="w-full text-center py-2.5 rounded-xl bg-zinc-800 hover:bg-zinc-700 text-zinc-300 hover:text-white font-semibold transition-all cursor-pointer text-xs border border-zinc-800"

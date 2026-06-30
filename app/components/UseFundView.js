@@ -79,7 +79,7 @@ export default function UseFundView() {
   };
 
   return (
-    <div className="flex-1 p-6 lg:p-10 bg-[#070b12] text-zinc-100 min-h-screen relative overflow-y-auto">
+    <div className="flex-1 p-4 sm:p-6 lg:p-10 pb-24 sm:pb-12 bg-[#070b12] text-zinc-100 relative">
       {/* Toast Notification Container */}
       <div className="fixed top-6 right-6 z-50 flex flex-col gap-3 max-w-md w-full pointer-events-none">
         {toasts.map((toast) => (
